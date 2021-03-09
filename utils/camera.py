@@ -43,9 +43,9 @@ def add_camera_args(parser):
                         help=('copy video frame internally [False]'))
     parser.add_argument('--do_resize', action='store_true',
                         help=('resize image/video [False]'))
-    parser.add_argument('--width', type=int, default=1280,
+    parser.add_argument('--width', type=int, default=640,
                         help='image width [640]')
-    parser.add_argument('--height', type=int, default=720,
+    parser.add_argument('--height', type=int, default=480,
                         help='image height [480]')
     return parser
 

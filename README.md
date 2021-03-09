@@ -1,4 +1,5 @@
 ## Automatic License Plate Recognition Implementation on Jetson Nano
+#### The system is built using yolov4-tiny (car and license plate detector) and crnn (license plate recognition) [Reference 2]
 
 ### **Prerequisite**
 #### 1. Requires TensorRT 6.x+
