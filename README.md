@@ -37,6 +37,10 @@ $ python3 main.py --image {image_path}
 
 #
 
+### **Demo**
+![car and license plate detection](./result.jpg)
+#
+
 ### **References**
 #### 1. https://github.com/jkjung-avt/tensorrt_demos
 #### 2. https://github.com/kfengtee/crnn-license-plate-OCR
