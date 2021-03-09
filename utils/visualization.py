@@ -16,6 +16,7 @@ TEXT_SCALE = 1.0
 TEXT_THICKNESS = 2
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
 
 
 def gen_colors(num_colors):
@@ -84,17 +85,21 @@ class BBoxVisualization():
       cls_dict: a dictionary used to translate class id to its name.
     """
 
-    def __init__(self, cls_dict):
+    def __init__(self, cls_dict, vid):
         self.cls_dict = cls_dict
         self.colors = gen_colors(len(cls_dict))
+        self.vid = vid
 
-    def draw_bboxes(self, img, boxes, confs, clss, name, lp):
+    def draw_bboxes(self, img, boxes, confs, clss, lp, allow=False):
         """Draw detected bounding boxes on the original image."""
         for bb, cf, cl in zip(boxes, confs, clss):
             cl = int(cl)
             x_min, y_min, x_max, y_max = bb[0], bb[1], bb[2], bb[3]
             color = self.colors[cl]
-            cv2.rectangle(img, (x_min, y_min), (x_max, y_max), color, 2)
+            if allow:
+               cv2.rectangle(img, (x_min, y_min), (x_max, y_max), GREEN, 2)
+            else:
+               cv2.rectangle(img, (x_min, y_min), (x_max, y_max), color, 2)
             txt_loc = (max(x_min+2, 0), max(y_min+2, 0))
             cls_name = self.cls_dict.get(cl, 'CLS{}'.format(cl))
             # For car and lp model            
@@ -104,7 +109,8 @@ class BBoxVisualization():
             else:
                txt = '{}'.format(cls_name)
                img = draw_boxed_text(img, txt, txt_loc, color)
-            cv2.imwrite('./detections/{}'.format(name), img)
+            if not self.vid:
+               cv2.imwrite('./detections/result.jpg', img)
         return img
 
     def crop_plate(self, img, boxes, confs, clss):
@@ -116,7 +122,8 @@ class BBoxVisualization():
                width = int(img.shape[1]*5)
                height = int(img.shape[0]*5)
                upsize = cv2.resize(gray, (width, height), interpolation=cv2.INTER_AREA)
-               cv2.imwrite('./detections/detection1.jpg', upsize)
+               if not self.vid:
+                  cv2.imwrite('./detections/croppedCarPlate.jpg', upsize)
                return upsize
             
             # convert image to black white 

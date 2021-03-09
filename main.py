@@ -1,4 +1,5 @@
 import os
+from os import path
 import time
 import argparse
 
@@ -13,12 +14,18 @@ from utils.yolo_with_plugins import TrtYOLO
 
 # OCR
 import model.alpr as alpr
+from statistics import mode
 
 lpr = alpr.AutoLPR(decoder='bestPath', normalise=True)
 lpr.load(crnn_path='model/weights/best-fyp-improved.pth')
 
+# Constant 
 WINDOW_NAME = 'TrtYOLODemo'
-
+lp_database = ['PEN1234', 'SCE5678']
+FILE_OUTPUT = './detections/test.mp4'
+# loop 5 times for mode result
+#list_of_plates = []
+#colected_lp = 5
 
 def parse_args():
     """Parse input arguments."""
@@ -30,11 +37,8 @@ def parse_args():
     parser.add_argument(
         '-c', '--category_num', type=int, default=80,
         help='number of object categories [80]')
-    #parser.add_argument(
-        #'-m', '--model', type=str, required=True,
-        #help=('[yolov3|yolov3-tiny|yolov3-spp|yolov4|yolov4-tiny]-'
-              #'[{dimension}], where dimension could be a single '
-              #'number (e.g. 288, 416, 608) or WxH (e.g. 416x256)'))
+    parser.add_argument(
+        '-s', '--save', default=False, const=True, nargs='?', help='save video')
     parser.add_argument(
         '-l', '--letter_box', action='store_true',
         help='inference with letterboxed image [False]')
@@ -42,7 +46,7 @@ def parse_args():
     return args
 
 
-def loop_and_detect(cam, trt_yolo, conf_th, vis):
+def loop_and_detect(cam, trt_yolo, conf_th, vis, save, vidwritter):
     """Continuously capture images from camera and do object detection.
 
     # Arguments
@@ -52,8 +56,11 @@ def loop_and_detect(cam, trt_yolo, conf_th, vis):
       vis: for visualization.
     """
     full_scrn = False
-    fps = 0.0
-    tic = time.time()
+    
+    # FPS
+    #fps = 0.0
+    #tic = time.time()
+    ALLOW = False
     while True:
         if cv2.getWindowProperty(WINDOW_NAME, 0) < 0:
             break
@@ -66,14 +73,51 @@ def loop_and_detect(cam, trt_yolo, conf_th, vis):
         lp_plate = ''
         if cropped is not None:
            lp_plate = lpr.predict(cropped)
-        img = vis.draw_bboxes(img, boxes, confs, clss, name='result1.jpg', lp= lp_plate)
-        img = show_fps(img, fps)
+           # Take directly
+           if lp_plate in lp_database:
+              # Open Door
+              print('Door Opened for {}'.format(lp_plate))
+              # Set allow to change box colour to green
+              ALLOW = True
+           else:
+              print('Access Denied!')        
+
+
+        # Loop 5 times then get mode (final) 
+        #if len(list_of_plates) < colected_lp:
+           #list_of_plates.append(lp_plate)
+           #print(list_of_plates)
+        #else:
+           #try:
+                #final = mode(list_of_plates)
+           #except:
+                #print('No mode found')
+           #list_of_plates.clear()
+           #print("Final Car Plate Result: {}".format(final))
+           # Compare with db
+           #if final in lp_database:
+              # Open Door
+              #print('Door Opened for {}'.format(final))
+              #ALLOW = True
+           #else:
+              #print('Access Denied!')
+           #final = ''
+           
+   
+        img = vis.draw_bboxes(img, boxes, confs, clss, lp= lp_plate, allow=ALLOW)
+        ALLOW = False
+        #img = show_fps(img, fps)
         cv2.imshow(WINDOW_NAME, img)
-        toc = time.time()
-        curr_fps = 1.0 / (toc - tic)
+        if save:
+            vidwritter.write(img)
+        
+        # FPS calculations
+        #toc = time.time()
+        #curr_fps = 1.0 / (toc - tic)
         # calculate an exponentially decaying average of fps number
-        fps = curr_fps if fps == 0.0 else (fps*0.95 + curr_fps*0.05)
-        tic = toc
+        #fps = curr_fps if fps == 0.0 else (fps*0.95 + curr_fps*0.05)
+        #tic = toc
+        
         key = cv2.waitKey(1)
         if key == 27:  # ESC key: quit program
             break
@@ -83,6 +127,11 @@ def loop_and_detect(cam, trt_yolo, conf_th, vis):
 
 
 def main():
+    # Directory to store results
+    cwd = os.getcwd()
+    if not path.exists(cwd+'/detections'):
+        os.mkdir(cwd+'/detections')
+   
     args = parse_args()
     if args.category_num <= 0:
         raise SystemExit('ERROR: bad category_num (%d)!' % args.category_num)
@@ -90,6 +139,10 @@ def main():
         #raise SystemExit('ERROR: file (yolo/%s.trt) not found!' % args.model)
 
     cam = Camera(args)
+    if args.save:
+        out = cv2.VideoWriter(FILE_OUTPUT, cv2.VideoWriter_fourcc(*'mp4v'), 20, (cam.img_width, cam.img_height))
+    else:
+        out = None
     if not cam.isOpened():
         raise SystemExit('ERROR: failed to open camera!')
     # Replace with custom dict
@@ -101,10 +154,12 @@ def main():
     open_window(
         WINDOW_NAME, 'Car and License Plate Detector',
         cam.img_width, cam.img_height)
-    vis = BBoxVisualization(car_custom_dict)
-    loop_and_detect(cam, carAndLP_trt_yolo, conf_th=0.5, vis=vis)
+    vis = BBoxVisualization(car_custom_dict, vid=args.save)
+    loop_and_detect(cam, carAndLP_trt_yolo, conf_th=0.5, vis=vis, save=args.save, vidwritter=out)
     
     cam.release()
+    if args.save:
+        out.release()
     cv2.destroyAllWindows()
 
 
