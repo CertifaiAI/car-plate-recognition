@@ -2,14 +2,11 @@ import os
 from os import path
 import time
 import argparse
-
 import cv2
 import pycuda.autoinit  # This is needed for initializing CUDA driver
-
 from utils.camera import add_camera_args, Camera
 from utils.display import open_window, set_display, show_fps
 from utils.visualization import BBoxVisualization
-
 from utils.yolo_with_plugins import TrtYOLO
 
 # OCR
@@ -23,6 +20,7 @@ lpr.load(crnn_path='model/weights/best-fyp-improved.pth')
 WINDOW_NAME = 'TrtYOLODemo'
 lp_database = ['PEN1234', 'SCE5678']
 FILE_OUTPUT = './detections/test.mp4'
+
 # loop 5 times for mode result
 #list_of_plates = []
 #colected_lp = 5
@@ -35,10 +33,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description=desc)
     parser = add_camera_args(parser)
     parser.add_argument(
-        '-c', '--category_num', type=int, default=80,
-        help='number of object categories [80]')
-    parser.add_argument(
-        '-s', '--save', default=False, const=True, nargs='?', help='save video')
+        '-s', '--save', default=False, const=True, nargs='?', help='save video in .mp4')
     parser.add_argument(
         '-l', '--letter_box', action='store_true',
         help='inference with letterboxed image [False]')
@@ -103,7 +98,6 @@ def loop_and_detect(cam, trt_yolo, conf_th, vis, save, vidwritter):
               #print('Access Denied!')
            #final = ''
            
-   
         img = vis.draw_bboxes(img, boxes, confs, clss, lp= lp_plate, allow=ALLOW)
         ALLOW = False
         #img = show_fps(img, fps)
@@ -133,11 +127,6 @@ def main():
         os.mkdir(cwd+'/detections')
    
     args = parse_args()
-    if args.category_num <= 0:
-        raise SystemExit('ERROR: bad category_num (%d)!' % args.category_num)
-    #if not os.path.isfile('yolo/%s.trt' % args.model):
-        #raise SystemExit('ERROR: file (yolo/%s.trt) not found!' % args.model)
-
     cam = Camera(args)
     if args.save:
         out = cv2.VideoWriter(FILE_OUTPUT, cv2.VideoWriter_fourcc(*'mp4v'), 20, (cam.img_width, cam.img_height))
@@ -149,7 +138,7 @@ def main():
     car_custom_dict = {0 : 'Car', 1: 'Licence Plate'}
     h = w = int(416)
     carAndLP_model = 'lpandcar-yolov4-tiny-416'
-    carAndLP_trt_yolo = TrtYOLO(carAndLP_model, (h, w), 2, args.letter_box)
+    carAndLP_trt_yolo = TrtYOLO(carAndLP_model, (h, w), category_num=2)
 
     open_window(
         WINDOW_NAME, 'Car and License Plate Detector',
