@@ -31,9 +31,12 @@ $ pip3 install -r requirements.txt
 
 #
 
-### **Run with image detection**
+### **Run image detection**
 ```
 $ python3 main.py --image {image_path}
+```
+```
+$ python3 main.py --video {video_path} --save (to save video)
 ```
 
 #
