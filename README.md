@@ -35,8 +35,9 @@ $ pip3 install -r requirements.txt
 ```
 $ python3 main.py --image {image_path}
 ```
+#### save tag is used to save video
 ```
-$ python3 main.py --video {video_path} --save (to save video)
+$ python3 main.py --video {video_path} --save
 ```
 
 #
