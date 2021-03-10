@@ -77,7 +77,6 @@ def draw_boxed_text(img, text, topleft, color):
     cv2.addWeighted(patch[0:h, 0:w, :], ALPHA, roi, 1 - ALPHA, 0, roi)
     return img
 
-
 class BBoxVisualization():
     """BBoxVisualization class implements nice drawing of boudning boxes.
 
@@ -85,7 +84,7 @@ class BBoxVisualization():
       cls_dict: a dictionary used to translate class id to its name.
     """
 
-    def __init__(self, cls_dict, vid):
+    def __init__(self, cls_dict, vid=False):
         self.cls_dict = cls_dict
         self.colors = gen_colors(len(cls_dict))
         self.vid = vid
@@ -136,4 +135,6 @@ class BBoxVisualization():
             # Rotate image 
             #dilation = imutils.rotate(dilation, 358)
             #dilation = imutils.rotate(dilation, 350)
+
+
                
