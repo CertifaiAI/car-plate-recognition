@@ -3,7 +3,7 @@ import time
 import cv2
 from utils.yolo_with_plugins import TrtYOLO
 
-class TestTheard:
+class YOLODetection:
     def __init__(self, videoStream):
         self.videoStream = videoStream
         self.thread = None

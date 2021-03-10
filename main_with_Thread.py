@@ -5,6 +5,7 @@
 
 # from fps import FPS
 from utils.videoStream import WebcamVideoStream
+from utils.detection import YOLODetection
 import imutils
 import cv2
 import time
@@ -19,7 +20,9 @@ parser.add_argument('--height', help='height of camera captured', default=720)
 args = parser.parse_args()
 
 # Initialize threads and constant
+
 vs = WebcamVideoStream(src=0, width=args.width, height=args.height).start()
+yolo_detect = YOLODetection(videoStream=vs)
 in_display_fps = 0.0
 tic = time.time()
 car_custom_dict = {0 : 'Car', 1: 'Licence Plate'}
