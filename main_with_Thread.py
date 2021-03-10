@@ -46,3 +46,4 @@ while(True):
 
 cv2.destroyAllWindows()
 vs.stop()
+yolo_detect.stop()
