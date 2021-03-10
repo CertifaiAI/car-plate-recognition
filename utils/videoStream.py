@@ -1,7 +1,7 @@
 from threading import Thread
 import cv2
 import subprocess
-from visualization import BBoxVisualization
+from utils.visualization import BBoxVisualization
 
 def open_cam_onboard(width, height):
     """Open the Jetson onboard camera."""
@@ -71,6 +71,6 @@ class WebcamVideoStream:
       # Crop car plate
       cropped = self.vis.crop_plate(output, self.boxes, self.confs, self.clss)
       # Visualize image
-      output = self.vis.draw_bboxes(output, boxes, confs, clss, lp= '')
+      output = self.vis.draw_bboxes(output, self.boxes, self.confs, self.clss, lp= '')
     return output
 

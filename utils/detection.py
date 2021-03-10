@@ -1,17 +1,14 @@
 from threading import Thread
 import time
 import cv2
-from utils.yolo_with_plugins import TrtYOLO
 
 class YOLODetection:
-    def __init__(self, videoStream):
+    def __init__(self, videoStream, model):
         self.videoStream = videoStream
+        self.modeltrt = model
         self.thread = None
         self.stopped = False
-        h = w = int(416)
-        carAndLP_model = 'lpandcar-yolov4-tiny-416'
-        self.carAndLP_trt_yolo = TrtYOLO(carAndLP_model, (h, w), category_num=2)
-    
+        
     def start(self):
         self.stopped = False
         self.thread = Thread(target=self.update)
@@ -26,7 +23,7 @@ class YOLODetection:
             frame = self.videoStream.read()
             # Detection here
             try:
-                boxes, confs, clss = self.carAndLP_trt_yolo.detect(frame, conf_th=0.5)
+                boxes, confs, clss = self.modeltrt.detect(frame, conf_th=0.5)
                 self.videoStream.set_yolo_result(boxes, confs, clss)
             except:
                 self.videoStream.set_yolo_result(None,None, None)
