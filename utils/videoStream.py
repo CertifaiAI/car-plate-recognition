@@ -31,7 +31,7 @@ def open_cam_onboard(width, height):
     return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
 
 class WebcamVideoStream:
-  def __init__(self, src=0, width ,height):
+  def __init__(self, width, height, src=0):
     self.stream = open_cam_onboard(width=width, height=height)
     (self.grabbed, self.frame) = self.stream.read()
     self.stopped = False
