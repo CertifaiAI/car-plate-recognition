@@ -53,8 +53,8 @@ def loop_and_detect(cam, trt_yolo, conf_th, vis, save, vidwritter):
     full_scrn = False
     
     # FPS
-    #fps = 0.0
-    #tic = time.time()
+    fps = 0.0
+    tic = time.time()
     ALLOW = False
     while True:
         if cv2.getWindowProperty(WINDOW_NAME, 0) < 0:
@@ -100,17 +100,17 @@ def loop_and_detect(cam, trt_yolo, conf_th, vis, save, vidwritter):
            
         img = vis.draw_bboxes(img, boxes, confs, clss, lp= lp_plate, allow=ALLOW)
         ALLOW = False
-        #img = show_fps(img, fps)
+        img = show_fps(img, fps)
         cv2.imshow(WINDOW_NAME, img)
         if save:
             vidwritter.write(img)
         
         # FPS calculations
-        #toc = time.time()
-        #curr_fps = 1.0 / (toc - tic)
+        toc = time.time()
+        curr_fps = 1.0 / (toc - tic)
         # calculate an exponentially decaying average of fps number
-        #fps = curr_fps if fps == 0.0 else (fps*0.95 + curr_fps*0.05)
-        #tic = toc
+        fps = curr_fps if fps == 0.0 else (fps*0.95 + curr_fps*0.05)
+        tic = toc
         
         key = cv2.waitKey(1)
         if key == 27:  # ESC key: quit program

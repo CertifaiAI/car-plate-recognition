@@ -67,10 +67,10 @@ class WebcamVideoStream:
 
   def output_yolo(self):
     output = self.frame
-    if self.boxes and self.confs and self.clss is not None:
+    #if self.boxes and self.confs and self.clss is not None:
       # Crop car plate
-      cropped = self.vis.crop_plate(output, self.boxes, self.confs, self.clss)
+    cropped = self.vis.crop_plate(output, self.boxes, self.confs, self.clss)
       # Visualize image
-      output = self.vis.draw_bboxes(output, self.boxes, self.confs, self.clss, lp= '')
+    output = self.vis.draw_bboxes(output, self.boxes, self.confs, self.clss, lp= '')
     return output
 

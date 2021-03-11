@@ -5,7 +5,7 @@
 
 # from fps import FPS
 from utils.videoStream import WebcamVideoStream
-from utils.detection import YOLODetection
+#from utils.detection import YOLODetection
 import imutils
 import cv2
 import time
@@ -25,14 +25,15 @@ h = w = int(416)
 carAndLP_model = 'lpandcar-yolov4-tiny-416'
 carAndLP_trt_yolo = TrtYOLO(carAndLP_model, (h, w), category_num=2)
 vs = WebcamVideoStream(src=0, width=args.width, height=args.height).start()
-yolo_detect = YOLODetection(videoStream=vs, model=carAndLP_trt_yolo).start()
+#yolo_detect = YOLODetection(videoStream=vs, model=carAndLP_trt_yolo).start()
 in_display_fps = 0.0
 tic = time.time()
 
 while(True):
-    #frame = vs.read()
-    #boxes, confs, clss = carAndLP_trt_yolo.detect(frame, conf_th=0.5)
-    #vs.set_yolo_result(boxes, confs, clss)
+    frame = vs.read()
+    boxes, confs, clss = carAndLP_trt_yolo.detect(frame, conf_th=0.5)
+    print(boxes)
+    vs.set_yolo_result(boxes, confs, clss)
     
     frame = vs.output_yolo()
     # Draw in display fps    
