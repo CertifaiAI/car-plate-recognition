@@ -57,20 +57,20 @@ class WebcamVideoStream:
   def stop(self):
     self.stopped = True
   
-  def set_yolo_result(self, boxes, confs, clss):
-    self.boxes = boxes
-    self.confs = confs
-    self.clss = clss
+  # def set_yolo_result(self, boxes, confs, clss):
+  #   self.boxes = boxes
+  #   self.confs = confs
+  #   self.clss = clss
 
-  def get_yolo_result(self):
-    return (self.boxes, self.confs, self.clss)
+  # def get_yolo_result(self):
+  #   return (self.boxes, self.confs, self.clss)
 
-  def output_yolo(self):
-    output = self.frame
-    #if self.boxes and self.confs and self.clss is not None:
-      # Crop car plate
-    cropped = self.vis.crop_plate(output, self.boxes, self.confs, self.clss)
-      # Visualize image
-    output = self.vis.draw_bboxes(output, self.boxes, self.confs, self.clss, lp= '')
-    return output
+  # def output_yolo(self):
+  #   output = self.frame
+  #   #if self.boxes and self.confs and self.clss is not None:
+  #     # Crop car plate
+  #   cropped = self.vis.crop_plate(output, self.boxes, self.confs, self.clss)
+  #     # Visualize image
+  #   output = self.vis.draw_bboxes(output, self.boxes, self.confs, self.clss, lp= '')
+  #   return output
 

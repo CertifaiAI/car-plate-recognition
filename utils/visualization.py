@@ -88,12 +88,54 @@ class BBoxVisualization():
         self.cls_dict = cls_dict
         self.colors = gen_colors(len(cls_dict))
         self.vid = vid
+    
+    def bb_intersection_over_union(self, boxA, boxB):
+      # determine the (x, y)-coordinates of the intersection rectangle
+      xA = max(boxA[0], boxB[0])
+      yA = max(boxA[1], boxB[1])
+      xB = min(boxA[2], boxB[2])
+      yB = min(boxA[3], boxB[3])
+      # compute the area of intersection rectangle
+      interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
+      # compute the area of both the prediction and ground-truth
+      # rectangles
+      boxAArea = (boxA[2] - boxA[0] + 1) * (boxA[3] - boxA[1] + 1)
+      boxBArea = (boxB[2] - boxB[0] + 1) * (boxB[3] - boxB[1] + 1)
+      # compute the intersection over union by taking the intersection
+      # area and dividing it by the sum of prediction + ground-truth
+      # areas - the interesection area
+      iou = interArea / float(boxAArea + boxBArea - interArea)
+      # return the intersection over union value
+      return iou
 
-    def draw_bboxes(self, img, boxes, confs, clss, lp, allow=False):
+    def carStopped(self, prev_box, boxes, clss, iou_percentage=0.9):
+        for bb, cl in zip(boxes, clss):
+            # Measure Car iou 
+            if cl == 0:
+                current_x_min, current_y_min, current_x_max, current_y_max = bb[0], bb[1], bb[2], bb[3]
+                curr_box = current_x_min, current_y_min, current_x_max, current_y_max
+                distance_cam= current_x_max - current_x_min
+                print(distance_cam)
+                # Do iou
+                iou = self.bb_intersection_over_union(curr_box, prev_box)
+                # Set current to previous 
+                prev_box = curr_box
+                # if iou > 98%
+                if iou > iou_percentage:
+                    carStop = True
+                    return prev_box, carStop
+                carStop = False
+                return prev_box, carStop
+        carStop = False
+        # prev_box = [0,0,0,0]
+        return prev_box, carStop
+
+    def draw_bboxes(self, img, boxes, confs, clss, lp, carColor, allow=False):
         """Draw detected bounding boxes on the original image."""
         for bb, cf, cl in zip(boxes, confs, clss):
             cl = int(cl)
             x_min, y_min, x_max, y_max = bb[0], bb[1], bb[2], bb[3]
+            # print(bb)
             color = self.colors[cl]
             if allow:
                cv2.rectangle(img, (x_min, y_min), (x_max, y_max), GREEN, 2)
@@ -106,10 +148,10 @@ class BBoxVisualization():
                txt = '{}: {}'.format(cls_name, lp)
                img = draw_boxed_text(img, txt, txt_loc, color)
             else:
-               txt = '{}'.format(cls_name)
+               txt = '{}: {}'.format(cls_name, carColor)
                img = draw_boxed_text(img, txt, txt_loc, color)
-            if not self.vid:
-               cv2.imwrite('./detections/result.jpg', img)
+            # if not self.vid:
+            #    cv2.imwrite('./detections/result.jpg', img)
         return img
 
     def crop_plate(self, img, boxes, confs, clss):
@@ -121,9 +163,18 @@ class BBoxVisualization():
                width = int(img.shape[1]*5)
                height = int(img.shape[0]*5)
                upsize = cv2.resize(gray, (width, height), interpolation=cv2.INTER_AREA)
-               if not self.vid:
-                  cv2.imwrite('./detections/croppedCarPlate.jpg', upsize)
+              #  if not self.vid:
+                  # cv2.imwrite('./detections/croppedCarPlate.jpg', upsize)
                return upsize
+
+    def crop_car(self, img, boxes, confs, clss):
+      for bb, cf, cl in zip(boxes, confs, clss):
+          if cl == 0:
+              x_min, y_min, x_max, y_max = bb[0], bb[1], bb[2], bb[3]
+              img = img[y_min:y_max, x_min:x_max]
+              # if not self.vid:
+                # cv2.imwrite('./detections/croppedCar.jpg', img)
+              return img
             
             # convert image to black white 
             #gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)

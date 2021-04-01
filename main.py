@@ -6,24 +6,9 @@ import cv2
 import pycuda.autoinit  # This is needed for initializing CUDA driver
 from utils.camera import add_camera_args, Camera
 from utils.display import open_window, set_display, show_fps
-from utils.visualization import BBoxVisualization
 from utils.yolo_with_plugins import TrtYOLO
-
-# OCR
+from utils.functions import carCloseEnough, carStopped, crop_plate, colorID, draw_bboxes, car_plate_present, crop_car
 import model.alpr as alpr
-from statistics import mode
-
-lpr = alpr.AutoLPR(decoder='bestPath', normalise=True)
-lpr.load(crnn_path='model/weights/best-fyp-improved.pth')
-
-# Constant 
-WINDOW_NAME = 'TrtYOLODemo'
-lp_database = ['PEN1234', 'SCE5678']
-FILE_OUTPUT = './detections/test.mp4'
-
-# loop 5 times for mode result
-#list_of_plates = []
-#colected_lp = 5
 
 def parse_args():
     """Parse input arguments."""
@@ -41,7 +26,7 @@ def parse_args():
     return args
 
 
-def loop_and_detect(cam, trt_yolo, conf_th, vis, save, vidwritter):
+def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_NAME):
     """Continuously capture images from camera and do object detection.
 
     # Arguments
@@ -62,46 +47,50 @@ def loop_and_detect(cam, trt_yolo, conf_th, vis, save, vidwritter):
         img = cam.read()
         if img is None:
             break
-       
-        boxes, confs, clss = trt_yolo.detect(img, conf_th)
-        cropped = vis.crop_plate(img, boxes, confs, clss)
-        lp_plate = ''
-        if cropped is not None:
-           lp_plate = lpr.predict(cropped)
-           # Take directly
-           if lp_plate in lp_database:
-              # Open Door
-              print('Door Opened for {}'.format(lp_plate))
-              # Set allow to change box colour to green
-              ALLOW = True
-           else:
-              print('Access Denied!')        
+        
+        # detect frame return box, confidence, class
+        boxes, confs, clss = trt_yolo.detect(img, conf_th=0.5)
+        # check car distance
+        carDistanceCloseEnough = carCloseEnough(boxes=boxes, clss=clss, distance_car_cam= 500)
+        # initialize variable
+        plate_number = ''
+        car_color = ''
+        if carDistanceCloseEnough:
+            # check car stopped
+            carStop = carStopped(prev_box=prev_box, boxes=boxes, clss=clss, iou_percentage=0.9)
+            if carStop:
+                # Both car and licence plate presence
+                car_plate_here =  car_plate_present(clss=clss)
+                if car_plate_here:
+                    # Crop car
+                    cropped_car = crop_car(img=img, boxes=boxes, clss=clss)
+                    # Crop car plate
+                    cropped_plate = crop_plate(img=img, boxes=boxes, clss=clss)
+                    # Start recognize plate
+                    # plate_number = lpr.predict(cropped_plate)
+                    # Do color identification
+                    car_color = colorID(img=cropped_car, NUM_CLUSTERS=2)
+                #     # Maybe car make and model
 
-
-        # Loop 5 times then get mode (final) 
-        #if len(list_of_plates) < colected_lp:
-           #list_of_plates.append(lp_plate)
-           #print(list_of_plates)
-        #else:
-           #try:
-                #final = mode(list_of_plates)
-           #except:
-                #print('No mode found')
-           #list_of_plates.clear()
-           #print("Final Car Plate Result: {}".format(final))
-           # Compare with db
-           #if final in lp_database:
-              # Open Door
-              #print('Door Opened for {}'.format(final))
-              #ALLOW = True
-           #else:
-              #print('Access Denied!')
-           #final = ''
+                #     # Make decision based on plate number
+                #     if plate_number in registered_plates:
+                #         print("Allow access and open gate for {}".format(plate_number))
+                #         # Open gate 
+                #     else:
+                #         print("Access denied and not open gate")
+                    # Visualize on frame with all data
+                    img = draw_bboxes(img=img, boxes=boxes, confs=confs, clss=clss, lp=plate_number, carColor=car_color)
+                #img = draw_bboxes(img=frame, boxes=boxes, confs=confs, clss=clss)
            
-        img = vis.draw_bboxes(img, boxes, confs, clss, lp= lp_plate, allow=ALLOW)
-        ALLOW = False
+        # ALLOW = False
         img = show_fps(img, fps)
         cv2.imshow(WINDOW_NAME, img)
+
+        # data
+        data = {'Plate Number': plate_number, 'Color': car_color, 'Make': '', 'Model': ''}
+        print(data)
+
+        # Save Video
         if save:
             vidwritter.write(img)
         
@@ -121,32 +110,62 @@ def loop_and_detect(cam, trt_yolo, conf_th, vis, save, vidwritter):
 
 
 def main():
-    # Directory to store results
+    # Initialize previous bounding boxes
+    prev_box = [0,0,0,0]
+
+    # directory to store 
     cwd = os.getcwd()
     if not path.exists(cwd+'/detections'):
         os.mkdir(cwd+'/detections')
-   
+    
+    # initialize camera 
     args = parse_args()
     cam = Camera(args)
+
+    # initialize video save
     if args.save:
+        FILE_OUTPUT = './detections/test.mp4'
         out = cv2.VideoWriter(FILE_OUTPUT, cv2.VideoWriter_fourcc(*'mp4v'), 20, (cam.img_width, cam.img_height))
     else:
         out = None
+    
+    # check camera
     if not cam.isOpened():
         raise SystemExit('ERROR: failed to open camera!')
-    # Replace with custom dict
-    car_custom_dict = {0 : 'Car', 1: 'Licence Plate'}
+
+
+    # Config Parser
+    # config = configparser.ConfigParser()
+    # config.read('settings.ini')
+    # # get backend config
+    # backend_hostname = config['Backend']['hostname']
+    # backend_port = config['Backend']['port']
+    # backend_endpoint = config['Backend']['get_plate_endpoint']
+    # get_plate_address = 'http://{}:{}/{}'.format(backend_hostname, backend_port, backend_endpoint)
+
+    # Initialize database connection to fetch carplates data
+    # registered_plates = requests.get(get_plate_address)
+    # Dummy 
+    # registered_plates = ['WYQ8233', 'WHY1612']
+
+    # Initialize detector
     h = w = int(416)
     carAndLP_model = 'lpandcar-yolov4-tiny-416'
-    carAndLP_trt_yolo = TrtYOLO(carAndLP_model, (h, w), category_num=2)
+    carAndLP_trt_yolo = TrtYOLO(carAndLP_model, (h, w), category_num=2) # Car and lp
 
-    open_window(
-        WINDOW_NAME, 'Car and License Plate Detector',
-        cam.img_width, cam.img_height)
-    vis = BBoxVisualization(car_custom_dict, vid=args.save)
-    loop_and_detect(cam, carAndLP_trt_yolo, conf_th=0.5, vis=vis, save=args.save, vidwritter=out)
+    # Initialze recognizer
+    # lpr = alpr.AutoLPR(decoder='bestPath', normalise=True)
+    # lpr.load(crnn_path='model/weights/best-fyp-improved.pth')
+
+    # Initialize output window
+    WINDOW_NAME = 'Car Gate'
+    open_window(WINDOW_NAME, 'Car Gate', cam.img_width, cam.img_height)
+    # Start looping
+    loop_and_detect(cam, carAndLP_trt_yolo, conf_th=0.9, save=args.save, vidwritter=out, prev_box=prev_box, WINDOW_NAME=WINDOW_NAME)
     
+    # After loop release all resources
     cam.release()
+    # if use Video saved
     if args.save:
         out.release()
     cv2.destroyAllWindows()
