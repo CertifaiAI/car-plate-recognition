@@ -1,141 +1,175 @@
-''' To Do: 
-1. Run video stream with threading
-2. Run AI in order
-3. Connect backend 
-
-Flow:
-1. Get frame from camera
-2. Detect car
-3. Detect plate
-4. Recignize plate
-5. Check with db
-6. If-else plate is registered 
-7. 
-
-'''
-# Imports
-import imutils
-# camera stream
-from utils.videoStream import WebcamVideoStream
-from utils.detection import YOLODetection
-import cv2 
-# fps counter
+import os
+from os import path
 import time
-from utils.display import show_fps
-# parsing arguement
 import argparse
-# parse settings
-import configparser
-# backend 
-import requests
-from datetime import datetime
-# detection
+import cv2
+import pycuda.autoinit  # This is needed for initializing CUDA driver
 from utils.camera import add_camera_args, Camera
 from utils.display import open_window, set_display, show_fps
-from utils.visualization import BBoxVisualization
 from utils.yolo_with_plugins import TrtYOLO
-import pycuda.autoinit 
-
-# OCR
+from utils.functions import carCloseEnough, carStopped, crop_plate, colorID, draw_bboxes, car_plate_present, crop_car
 import model.alpr as alpr
-from statistics import mode
+
+def parse_args():
+    """Parse input arguments."""
+    desc = ('Capture and display live camera video, while doing '
+            'real-time object detection with TensorRT optimized '
+            'YOLO model on Jetson')
+    parser = argparse.ArgumentParser(description=desc)
+    parser = add_camera_args(parser)
+    parser.add_argument(
+        '-s', '--save', default=False, const=True, nargs='?', help='save video in .mp4')
+    parser.add_argument(
+        '-l', '--letter_box', action='store_true',
+        help='inference with letterboxed image [False]')
+    args = parser.parse_args()
+    return args
 
 
-# Parser
-# arguement parser
-parser = argparse.ArgumentParser()
-parser.add_argument('--width', help='width of camera captured', default=640)
-parser.add_argument('--height', help='height of camera captured', default=480)
+def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_NAME):
+    """Continuously capture images from camera and do object detection.
 
-# parser.add_argument('--width', help='width of camera captured', default=1280)
-# parser.add_argument('--height', help='height of camera captured', default=720)
-args = parser.parse_args()
-# config parser
-#config = configparser.ConfigParser()
-#server = config['backend']['hostname']
-#port = config['backend']['port']
-#url = 'http://{}:{}/'.format(server, port)
+    # Arguments
+      cam: the camera instance (video source).
+      trt_yolo: the TRT YOLO object detector instance.
+      conf_th: confidence/score threshold for object detection.
+      vis: for visualization.
+    """
+    full_scrn = False
+    
+    # FPS
+    fps = 0.0
+    tic = time.time()
+    ALLOW = False
+    while True:
+        if cv2.getWindowProperty(WINDOW_NAME, 0) < 0:
+            break
+        img = cam.read()
+        if img is None:
+            break
+        
+        # detect frame return box, confidence, class
+        boxes, confs, clss = trt_yolo.detect(img, conf_th=0.5)
+        # check car distance
+        carDistanceCloseEnough = carCloseEnough(boxes=boxes, clss=clss, distance_car_cam= 500)
+        # initialize variable
+        plate_number = ''
+        car_color = ''
+        if carDistanceCloseEnough:
+            # check car stopped
+            carStop = carStopped(prev_box=prev_box, boxes=boxes, clss=clss, iou_percentage=0.9)
+            if carStop:
+                # Both car and licence plate presence
+                car_plate_here =  car_plate_present(clss=clss)
+                if car_plate_here:
+                    # Crop car
+                    cropped_car = crop_car(img=img, boxes=boxes, clss=clss)
+                    # Crop car plate
+                    cropped_plate = crop_plate(img=img, boxes=boxes, clss=clss)
+                    # Start recognize plate
+                    # plate_number = lpr.predict(cropped_plate)
+                    # Do color identification
+                    car_color = colorID(img=cropped_car, NUM_CLUSTERS=2)
+                #     # Maybe car make and model
 
-# Constant
-WINDOW_NAME = 'TrtYOLODemo'
-lp_database = ['PEN1234', 'SCE5678']
-FILE_OUTPUT = './detections/test.mp4'
-# video stream
-vs = WebcamVideoStream(src=0, width=args.width, height=args.height).start()
-# fps counter
-in_display_fps = 0.0
-tic = time.time()
-# detection
-className = {0: 'Car', 1: 'Plate'}
-modelName = 'lpandcar-yolov4-tiny-416'
-trt_yolo = TrtYOLO(modelName, (416, 416), 1, True)
-# recognition
-lpr = alpr.AutoLPR(decoder='bestPath', normalise=True)
-lpr.load(crnn_path='model/weights/best-fyp-improved.pth')
+                #     # Make decision based on plate number
+                #     if plate_number in registered_plates:
+                #         print("Allow access and open gate for {}".format(plate_number))
+                #         # Open gate 
+                #     else:
+                #         print("Access denied and not open gate")
+                    # Visualize on frame with all data
+                    img = draw_bboxes(img=img, boxes=boxes, confs=confs, clss=clss, lp=plate_number, carColor=car_color)
+                #img = draw_bboxes(img=frame, boxes=boxes, confs=confs, clss=clss)
+           
+        # ALLOW = False
+        img = show_fps(img, fps)
+        cv2.imshow(WINDOW_NAME, img)
 
-# endpoints
-#get_plate_endpoint = url + 'carplates'
-#post_data_endpoint = url + 'data'
+        # data
+        data = {'Plate Number': plate_number, 'Color': car_color, 'Make': '', 'Model': ''}
+        print(data)
 
-# Main 
-while(True):
-    # connect to backend to get plates
-    # try:
-        # get plate numbers from db : list
-        # registed_lp_plates = requests.get(ip+"get_plate_endpoint")
-        # registed_lp_plates = registed_lp_plates.json()
-    # except:
-    #     print('Cannot connect to backend server')
+        # Save Video
+        if save:
+            vidwritter.write(img)
+        
+        # FPS calculations
+        toc = time.time()
+        curr_fps = 1.0 / (toc - tic)
+        # calculate an exponentially decaying average of fps number
+        fps = curr_fps if fps == 0.0 else (fps*0.95 + curr_fps*0.05)
+        tic = toc
+        
+        key = cv2.waitKey(1)
+        if key == 27:  # ESC key: quit program
+            break
+        elif key == ord('F') or key == ord('f'):  # Toggle fullscreen
+            full_scrn = not full_scrn
+            set_display(WINDOW_NAME, full_scrn)
 
-    # Read frame from vs thread
-    frame = vs.read()
-    # Draw 'in display' fps counter    
-    img = show_fps(frame, in_display_fps)
-    # Pass to detector : return car plate num
-    boxes, confs, clss = trt_yolo.detect(frame, 0.5)
-    cropped_plate = vis.crop_plate(img, boxes, confs, clss)
 
-    lp_plate = ''
-    if cropped is not None:
-        lp_plate = lpr.predict(cropped_plate)
-        # Take directly
-        if lp_plate in lp_database:
-            # Open Door
-            print('Door Opened for {}'.format(lp_plate))
-            # Set allow to change box colour to green
-            # ALLOW = True
-        else:
-            print('Access Denied!')
+def main():
+    # Initialize previous bounding boxes
+    prev_box = [0,0,0,0]
 
-    # check plate is registered?
-    # if final_lp in registed_lp_plates:
-        # Allow car enter (light up LED)
-        # ser = serial.Serial('/dev/ttyACM0', 9600)
-        # Post to API
-        # open_time = datetime.now()
-        # data = {
-        #     "carplate_no": final_lp,
-        #     "time": str(open_time)
-        # }
-        # requests.post(ip+"enter", data=json.dumps(data))
-    #     print("Please Enter")
-    # else:
-    #     print("Permision Denied!")
+    # directory to store 
+    cwd = os.getcwd()
+    if not path.exists(cwd+'/detections'):
+        os.mkdir(cwd+'/detections')
+    
+    # initialize camera 
+    args = parse_args()
+    cam = Camera(args)
 
-    # show frame 
-    frame = imutils.resize(frame, width=700)
-    cv2.imshow("Frame", img)
-    # in display fps
-    toc = time.time()
-    curr_fps = 1.0 / (toc - tic)
-    in_display_fps = curr_fps if in_display_fps == 0.0 else (in_display_fps*0.95 + curr_fps*0.05)
-    tic = toc
-    # break when interupt
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    # initialize video save
+    if args.save:
+        FILE_OUTPUT = './detections/test.mp4'
+        out = cv2.VideoWriter(FILE_OUTPUT, cv2.VideoWriter_fourcc(*'mp4v'), 20, (cam.img_width, cam.img_height))
+    else:
+        out = None
+    
+    # check camera
+    if not cam.isOpened():
+        raise SystemExit('ERROR: failed to open camera!')
 
-# get rid of cv2 windows
-cv2.destroyAllWindows()
-# stop thread
-vs.stop()
-carModel.stop()
+
+    # Config Parser
+    # config = configparser.ConfigParser()
+    # config.read('settings.ini')
+    # # get backend config
+    # backend_hostname = config['Backend']['hostname']
+    # backend_port = config['Backend']['port']
+    # backend_endpoint = config['Backend']['get_plate_endpoint']
+    # get_plate_address = 'http://{}:{}/{}'.format(backend_hostname, backend_port, backend_endpoint)
+
+    # Initialize database connection to fetch carplates data
+    # registered_plates = requests.get(get_plate_address)
+    # Dummy 
+    # registered_plates = ['WYQ8233', 'WHY1612']
+
+    # Initialize detector
+    h = w = int(416)
+    carAndLP_model = 'lpandcar-yolov4-tiny-416'
+    carAndLP_trt_yolo = TrtYOLO(carAndLP_model, (h, w), category_num=2) # Car and lp
+
+    # Initialze recognizer
+    # lpr = alpr.AutoLPR(decoder='bestPath', normalise=True)
+    # lpr.load(crnn_path='model/weights/best-fyp-improved.pth')
+
+    # Initialize output window
+    WINDOW_NAME = 'Car Gate'
+    open_window(WINDOW_NAME, 'Car Gate', cam.img_width, cam.img_height)
+    # Start looping
+    loop_and_detect(cam, carAndLP_trt_yolo, conf_th=0.9, save=args.save, vidwritter=out, prev_box=prev_box, WINDOW_NAME=WINDOW_NAME)
+    
+    # After loop release all resources
+    cam.release()
+    # if use Video saved
+    if args.save:
+        out.release()
+    cv2.destroyAllWindows()
+
+
+if __name__ == '__main__':
+    main()
