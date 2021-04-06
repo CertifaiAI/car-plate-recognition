@@ -1,3 +1,2 @@
 fastapi[all]
-sqlite3 
 pandas
