@@ -151,7 +151,7 @@ def car_plate_present(clss):
         return True
     return False
 
-# generate colors
+# Generate colors
 def gen_colors(num_colors):
     """Generate different colors.
 

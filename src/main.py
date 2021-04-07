@@ -9,6 +9,8 @@ from utils.display import open_window, set_display, show_fps
 from utils.yolo_with_plugins import TrtYOLO
 from utils.functions import carCloseEnough, carStopped, crop_plate, colorID, draw_bboxes, car_plate_present, crop_car
 import model.alpr as alpr
+import requests
+import json
 
 def parse_args():
     """Parse input arguments."""
@@ -66,23 +68,19 @@ def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_N
                     cropped_car = crop_car(img=img, boxes=boxes, clss=clss)
                     # Crop car plate
                     cropped_plate = crop_plate(img=img, boxes=boxes, clss=clss)
-                    # Start recognize plate
-                    # plate_number = lpr.predict(cropped_plate)
-                    # Do color identification
-                    car_color = colorID(img=cropped_car, NUM_CLUSTERS=2)
-                #     # Maybe car make and model
-
-                #     # Make decision based on plate number
-                #     if plate_number in registered_plates:
-                #         print("Allow access and open gate for {}".format(plate_number))
-                #         # Open gate 
-                #     else:
-                #         print("Access denied and not open gate")
+                    # Data
+                    data = {'carShape': cropped_car.shape, 'carImg': base64.b64encode(cropped_car.tobytes()),'plateShape': cropped_plate.shape, 'plateImg': base64.b64encode(cropped_plate.tobytes())}
+                    # Send request to server
+                    plate_number, car_color= requests.post(server, data=json.dumps(data))
+                    # Make decision based on plate number
+                    if plate_number in registered_plates:
+                        print("Allow access and open gate for {}".format(plate_number))
+                        # Open gate 
+                    else:
+                        print("Access denied and not open gate")
                     # Visualize on frame with all data
                     img = draw_bboxes(img=img, boxes=boxes, confs=confs, clss=clss, lp=plate_number, carColor=car_color)
                 #img = draw_bboxes(img=frame, boxes=boxes, confs=confs, clss=clss)
-           
-        # ALLOW = False
         img = show_fps(img, fps)
         cv2.imshow(WINDOW_NAME, img)
 
@@ -152,10 +150,6 @@ def main():
     h = w = int(416)
     carAndLP_model = 'lpandcar-yolov4-tiny-416'
     carAndLP_trt_yolo = TrtYOLO(carAndLP_model, (h, w), category_num=2) # Car and lp
-
-    # Initialze recognizer
-    # lpr = alpr.AutoLPR(decoder='bestPath', normalise=True)
-    # lpr.load(crnn_path='model/weights/best-fyp-improved.pth')
 
     # Initialize output window
     WINDOW_NAME = 'Car Gate'

@@ -5,7 +5,9 @@ import pandas as pd
 from models.enter_records import enter_Records
 from models.exit_records import exit_Records
 from models.users import Users
-
+from models.ai_process import ai_process
+from aiFunctions import colorID, recognizePlate
+import numpy as np
 
 # Connect db + startup
 try:
@@ -44,32 +46,13 @@ async def updateRecords(recordsDM: exit_Records):
     update(connection, "exit_records", records=recordsDM)
     return "Data Received!"
 
-# FrontEnd
-# Get data from users
-@app.get("/users")
-async def getUsers():
-    df = pd.read_sql_query("Select * from users", connection)
-    return df
 
-# Get data from enter_records
-@app.get("/enter")
-async def getRecords():
-    df = pd.read_sql_query("Select * from enter_records", connection)
-    return df
-
-# Get data from exit_records
-@app.get("/exit")
-async def getRecords():
-    df = pd.read_sql_query("Select * from exit_records", connection)
-    return df
-
-# Update or insert new users
-@app.post("/users")
-async def updateUsers(usersDM: Users):
-    update(connection, "users", users=usersDM)
-    return "Received"
-
-@app.delete("/users")
-async def deleteUsers(carplate_no: str):
-    delete(carplate_no, "users", connection)
-    return "Data Deleted"
+@app.post("/ai")
+async def aiProcess(inputs: ai_process):
+    print(inputs)
+    # convert img back 
+    carImage = np.frombuffer(base64.b64decode(inputs.carImg)).reshape(inputs.carShape)
+    plateImage = np.frombuffer(base64.b64decode(inputs.plateImg)).reshape(inputs.plateShape)
+    plate_number = recognizePlate(plate)
+    car_color = colorID(car)
+    return plate_number, car_color

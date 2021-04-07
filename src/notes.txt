@@ -1,3 +1,7 @@
 1. Improve car detection (accuracy seems off)
 2. Improve license plate detection (focus on detect plate only)
 3. Improve CRNN (change it or fine tune) 
+
+
+barrier gate
+https://globalperimetersolutions.com/product/manual-boom-gate/
