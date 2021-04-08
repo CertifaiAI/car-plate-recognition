@@ -36,13 +36,13 @@ async def getCarPlates():
 
 # Update enter records
 @app.post("/enter")
-async def updateRecords(recordsDM: enter_Records):
+async def updateRecords(recordsDM: records):
     update(connection, "enter_records", records=recordsDM)
     return "Data Received!"
 
 # Update exit records
 @app.post("/exit")
-async def updateRecords(recordsDM: exit_Records):
+async def updateRecords(recordsDM: records):
     update(connection, "exit_records", records=recordsDM)
     return "Data Received!"
 
