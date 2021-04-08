@@ -233,9 +233,8 @@ def draw_bboxes(img, boxes, confs, clss, lp='', carColor='', modelandmake=''):
     return img
 
 def cv2Img_base64Img(cv2Img):
-    image = cv2.cvtColor(cv2Img, cv2.COLOR_BGR2RGB)
     # array to Pil
-    image = Image.fromarray(image)
+    image = Image.fromarray(cv2Img)
     # Pil to bytes
     buffer = io.BytesIO()
     image.save(buffer, format="JPEG")

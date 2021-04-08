@@ -17,7 +17,7 @@ def cv2Img_base64Img(cv2Img):
 
 
 
-image = cv2.imread('/home/nexlson/Skymind/Cargate/car-plate-recognition/src/front.jpg')
+image = cv2.imread('/home/nelson/Desktop/saved_detections/PFQ5217.jpg')
 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 test = cv2Img_base64Img(image)
 # print(test)
@@ -27,7 +27,7 @@ test = cv2Img_base64Img(image)
 # print(jpg_as_text)
 data = {'image': test}
 try:
-    response = requests.post('http://0.0.0.0:8000/testimage', data=json.dumps(data))
+    response = requests.post('http://10.10.10.35:8000/plate', data=json.dumps(data))
 except:
     print('failed')
 print(str(response.text))

@@ -7,7 +7,7 @@ import pycuda.autoinit  # This is needed for initializing CUDA driver
 from utils.camera import add_camera_args, Camera
 from utils.display import open_window, set_display, show_fps
 from utils.yolo_with_plugins import TrtYOLO
-from utils.functions import carCloseEnough, carStopped, crop_plate, colorID, draw_bboxes, car_plate_present, crop_car
+from utils.functions import carCloseEnough, carStopped, crop_plate, colorID, draw_bboxes, car_plate_present, crop_car, cv2Img_base64Img
 import model.alpr as alpr
 import requests
 import json
@@ -30,7 +30,7 @@ def parse_args():
     return args
 
 
-def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_NAME, ai_address):
+def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_NAME, address):
     """Continuously capture images from camera and do object detection.
 
     # Arguments
@@ -72,15 +72,17 @@ def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_N
                     cropped_plate = crop_plate(img=img, boxes=boxes, clss=clss)
                     # Data
                     # encode
-                    car_encoded = cv2.imencode(".jpg", cropped_car)
-                    plate_encoded = cv2.imencode(".jpg", cropped_plate)
-                    # To base64
-                    car_encoded = base64.b64encode(car_encoded)
-                    plate_encoded = base64.b64encode(plate_encoded)
-                    sendData = {'carShape': cropped_car.shape, 'carImg': car_encoded, 'plateShape': cropped_plate.shape, 'plateImg': plate_encoded}
-                    print(data)
+                    cropped_car = cv2.cvtColor(cropped_car, cv2.COLOR_BGR2RGB)
+                    cropped_plate = cv2.cvtColor(cropped_plate, cv2.COLOR_BGR2RGB)
+                    car_encoded = cv2Img_base64Img(cropped_car)
+                    plate_encoded = cv2Img_base64Img(cropped_plate)
+                    carData = {'image': car_encoded}
+                    plateData = {'image': plate_encoded}
                     # Send request to server
-                    plate_number, car_color= requests.post(ai_address, data=data)
+                    carResponses= requests.post(address+'/car', data=json.dumps(carData))
+                    print(str(carResponses.text))
+                    plateResponses= requests.post(address+'/plate', data=json.dumps(plateData))
+                    print(str(plateResponses.text))
                     # Make decision based on plate number
                     registered_plates = ['WYQ8233', 'WHY1612']
                     if plate_number in registered_plates:
@@ -108,12 +110,9 @@ def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_N
         # calculate an exponentially decaying average of fps number
         fps = curr_fps if fps == 0.0 else (fps*0.95 + curr_fps*0.05)
         tic = toc
-        
+        #time.sleep(3)
         key = cv2.waitKey(1)
         if key == 27:  # ESC key: quit program
-            f = open('data.txt', 'w')
-            f.write(repr(sendData))
-            f.close()
             break
         elif key == ord('F') or key == ord('f'):  # Toggle fullscreen
             full_scrn = not full_scrn
@@ -152,9 +151,9 @@ def main():
     backend_hostname = config['Backend']['hostname']
     backend_port = config['Backend']['port']
     backend_endpoint_getplates = config['Backend']['get_plate_endpoint']
-    backend_endpoint_ai = config['Backend']['ai']
+    #backend_endpoint_ai = config['Backend']['ai']
     get_plate_address = 'http://{}:{}/{}'.format(backend_hostname, backend_port, backend_endpoint_getplates)
-    ai_address = 'http://{}:{}/{}'.format(backend_hostname, backend_port, backend_endpoint_ai)
+    address = 'http://{}:{}'.format(backend_hostname, backend_port)
 
     # Initialize database connection to fetch carplates data
     # registered_plates = requests.get(get_plate_address)
@@ -170,7 +169,7 @@ def main():
     WINDOW_NAME = 'Car Gate'
     open_window(WINDOW_NAME, 'Car Gate', cam.img_width, cam.img_height)
     # Start looping
-    loop_and_detect(cam, carAndLP_trt_yolo, conf_th=0.9, save=args.save, vidwritter=out, prev_box=prev_box, WINDOW_NAME=WINDOW_NAME, ai_address=ai_address)
+    loop_and_detect(cam, carAndLP_trt_yolo, conf_th=0.9, save=args.save, vidwritter=out, prev_box=prev_box, WINDOW_NAME=WINDOW_NAME, address=address)
     
     # After loop release all resources
     cam.release()
