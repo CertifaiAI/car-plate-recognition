@@ -4,8 +4,13 @@ from crud import create, update, delete
 import pandas as pd
 from models.records import records
 from models.ai_process import ai_process
+from models.image import image
 from aiFunctions import colorID, recognizePlate
 import numpy as np
+from PIL import Image
+import io
+import base64
+import cv2
 
 # Connect db + startup
 try:
@@ -45,12 +50,29 @@ async def updateRecords(recordsDM: records):
     return "Data Received!"
 
 
+def base64Img_cv2Img(base64Img):
+    # decode base64
+    bytes_decoded = base64.b64decode(base64Img)
+    # decode io
+    buffer = io.BytesIO(bytes_decoded)
+    # decode back to cv2
+    decoded_img = cv2.imdecode(np.frombuffer(buffer.getbuffer(), np.uint8), -1)
+    return decoded_img
+
 @app.post("/ai")
 async def aiProcess(inputs: ai_process):
     print(inputs)
     # convert img back 
-    carImage = np.frombuffer(base64.b64decode(inputs.carImg)).reshape(inputs.carShape)
-    plateImage = np.frombuffer(base64.b64decode(inputs.plateImg)).reshape(inputs.plateShape)
-    plate_number = recognizePlate(plate)
-    car_color = colorID(car)
+    carImg = base64Img_cv2Img(inputs.carImg)
+    # convert plate back
+    plateImg = base64Img_cv2Img(inputs.plateImg) 
+    plate_number = recognizePlate(plateImg)
+    car_color = colorID(carImg)
     return plate_number, car_color
+
+@app.post("/testimage")
+async def image(inputs:image):
+    # print(inputs.image)
+    carImg = base64Img_cv2Img(inputs.image)
+    car_color = colorID(carImg, 3)
+    return car_color
