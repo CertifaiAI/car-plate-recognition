@@ -2,9 +2,7 @@ from fastapi import FastAPI
 import sqlite3
 from crud import create, update, delete
 import pandas as pd
-from models.enter_records import enter_Records
-from models.exit_records import exit_Records
-from models.users import Users
+from models.records import records
 from models.ai_process import ai_process
 from aiFunctions import colorID, recognizePlate
 import numpy as np

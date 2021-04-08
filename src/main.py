@@ -28,7 +28,7 @@ def parse_args():
     return args
 
 
-def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_NAME):
+def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_NAME, ai_address):
     """Continuously capture images from camera and do object detection.
 
     # Arguments
@@ -71,7 +71,7 @@ def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_N
                     # Data
                     data = {'carShape': cropped_car.shape, 'carImg': base64.b64encode(cropped_car.tobytes()),'plateShape': cropped_plate.shape, 'plateImg': base64.b64encode(cropped_plate.tobytes())}
                     # Send request to server
-                    plate_number, car_color= requests.post(server, data=json.dumps(data))
+                    plate_number, car_color= requests.post(ai_address, data=json.dumps(data))
                     # Make decision based on plate number
                     if plate_number in registered_plates:
                         print("Allow access and open gate for {}".format(plate_number))
@@ -133,13 +133,15 @@ def main():
 
 
     # Config Parser
-    # config = configparser.ConfigParser()
-    # config.read('settings.ini')
-    # # get backend config
-    # backend_hostname = config['Backend']['hostname']
-    # backend_port = config['Backend']['port']
-    # backend_endpoint = config['Backend']['get_plate_endpoint']
-    # get_plate_address = 'http://{}:{}/{}'.format(backend_hostname, backend_port, backend_endpoint)
+    config = configparser.ConfigParser()
+    config.read('settings.ini')
+    # get backend config
+    backend_hostname = config['Backend']['hostname']
+    backend_port = config['Backend']['port']
+    backend_endpoint_getplates = config['Backend']['get_plate_endpoint']
+    backend_endpoint_ai = config['Backend']['ai']
+    get_plate_address = 'http://{}:{}/{}'.format(backend_hostname, backend_port, backend_endpoint_getplates)
+    ai_address = 'http://{}:{}/{}'.format(backend_hostname, backend_port, backend_endpoint_ai)
 
     # Initialize database connection to fetch carplates data
     # registered_plates = requests.get(get_plate_address)
@@ -155,7 +157,7 @@ def main():
     WINDOW_NAME = 'Car Gate'
     open_window(WINDOW_NAME, 'Car Gate', cam.img_width, cam.img_height)
     # Start looping
-    loop_and_detect(cam, carAndLP_trt_yolo, conf_th=0.9, save=args.save, vidwritter=out, prev_box=prev_box, WINDOW_NAME=WINDOW_NAME)
+    loop_and_detect(cam, carAndLP_trt_yolo, conf_th=0.9, save=args.save, vidwritter=out, prev_box=prev_box, WINDOW_NAME=WINDOW_NAME, ai_address=ai_address)
     
     # After loop release all resources
     cam.release()
