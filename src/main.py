@@ -11,6 +11,8 @@ from utils.functions import carCloseEnough, carStopped, crop_plate, colorID, dra
 import model.alpr as alpr
 import requests
 import json
+import configparser
+import base64
 
 def parse_args():
     """Parse input arguments."""
@@ -69,10 +71,18 @@ def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_N
                     # Crop car plate
                     cropped_plate = crop_plate(img=img, boxes=boxes, clss=clss)
                     # Data
-                    data = {'carShape': cropped_car.shape, 'carImg': base64.b64encode(cropped_car.tobytes()),'plateShape': cropped_plate.shape, 'plateImg': base64.b64encode(cropped_plate.tobytes())}
+                    # encode
+                    car_encoded = cv2.imencode(".jpg", cropped_car)
+                    plate_encoded = cv2.imencode(".jpg", cropped_plate)
+                    # To base64
+                    car_encoded = base64.b64encode(car_encoded)
+                    plate_encoded = base64.b64encode(plate_encoded)
+                    sendData = {'carShape': cropped_car.shape, 'carImg': car_encoded, 'plateShape': cropped_plate.shape, 'plateImg': plate_encoded}
+                    print(data)
                     # Send request to server
-                    plate_number, car_color= requests.post(ai_address, data=json.dumps(data))
+                    plate_number, car_color= requests.post(ai_address, data=data)
                     # Make decision based on plate number
+                    registered_plates = ['WYQ8233', 'WHY1612']
                     if plate_number in registered_plates:
                         print("Allow access and open gate for {}".format(plate_number))
                         # Open gate 
@@ -101,6 +111,9 @@ def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_N
         
         key = cv2.waitKey(1)
         if key == 27:  # ESC key: quit program
+            f = open('data.txt', 'w')
+            f.write(repr(sendData))
+            f.close()
             break
         elif key == ord('F') or key == ord('f'):  # Toggle fullscreen
             full_scrn = not full_scrn
@@ -146,7 +159,7 @@ def main():
     # Initialize database connection to fetch carplates data
     # registered_plates = requests.get(get_plate_address)
     # Dummy 
-    # registered_plates = ['WYQ8233', 'WHY1612']
+    
 
     # Initialize detector
     h = w = int(416)
