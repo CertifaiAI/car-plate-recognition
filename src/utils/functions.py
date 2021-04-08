@@ -7,6 +7,8 @@ import scipy.misc
 import scipy.cluster
 import webcolors
 import cv2
+import io
+import base64
 
 # Constants
 ALPHA = 0.5
@@ -229,3 +231,12 @@ def draw_bboxes(img, boxes, confs, clss, lp='', carColor='', modelandmake=''):
             txt = '{}:{} {}, {}'.format(cls_name, cf, carColor, modelandmake)
             img = draw_boxed_text(img, txt, txt_loc, color)
     return img
+
+def cv2Img_base64Img(cv2Img):
+    image = cv2.cvtColor(cv2Img, cv2.COLOR_BGR2RGB)
+    # array to Pil
+    image = Image.fromarray(image)
+    # Pil to bytes
+    buffer = io.BytesIO()
+    image.save(buffer, format="JPEG")
+    return base64.b64encode(buffer.getvalue()).decode('ascii')
