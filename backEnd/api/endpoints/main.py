@@ -27,13 +27,14 @@ app = FastAPI()
 
 # Nano
 # Get carplates data
-# @app.get("/carplates")
-# async def getCarPlates():
-#     # list_of_carplate = return_carplate_list(connection)
-#     # print(list_of_carplate)
-#     df = pd.read_sql_query("Select * from users", connection)
-#     cp_list = df['carplate_no'].tolist()
-#     return cp_list
+@app.get("/carplates")
+async def getCarPlates():
+    # list_of_carplate = return_carplate_list(connection)
+    # print(list_of_carplate)
+    # df = pd.read_sql_query("Select * from users", connection)
+    # cp_list = df['carplate_no'].tolist()
+    plates = ['WYQ8233', 'WHY1612']
+    return plates
 
 # # Update enter records
 # @app.post("/enter")

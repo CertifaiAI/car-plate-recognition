@@ -30,7 +30,7 @@ def parse_args():
     return args
 
 
-def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_NAME, address):
+def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_NAME, address, backend_endpoint_plate, backend_endpoint_car, backend_endpoint_getplates):
     """Continuously capture images from camera and do object detection.
 
     # Arguments
@@ -46,6 +46,9 @@ def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_N
     tic = time.time()
     ALLOW = False
     while True:
+         # Initialize database connection to fetch carplates data
+        registered_plates = requests.get(address+backend_endpoint_getplates)
+
         if cv2.getWindowProperty(WINDOW_NAME, 0) < 0:
             break
         img = cam.read()
@@ -80,12 +83,13 @@ def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_N
                     carData = {'image': car_encoded}
                     plateData = {'image': plate_encoded}
                     # Send request to server
-                    carResponses= requests.post(address+'/car', data=json.dumps(carData))
-                    print(str(carResponses.text))
-                    plateResponses= requests.post(address+'/plate', data=json.dumps(plateData))
-                    print(str(plateResponses.text))
+                    carResponses= requests.post(address+backend_endpoint_car, data=json.dumps(carData))
+                    # print(str(carResponses.text))
+                    car_color = str(carResponses.text)
+                    plateResponses= requests.post(address+backend_endpoint_plate, data=json.dumps(plateData))
+                    # print(str(plateResponses.text))
+                    plate_number = str(plateResponses.text)
                     # Make decision based on plate number
-                    registered_plates = ['WYQ8233', 'WHY1612']
                     if plate_number in registered_plates:
                         print("Allow access and open gate for {}".format(plate_number))
                         # Open gate 
@@ -98,7 +102,7 @@ def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_N
         cv2.imshow(WINDOW_NAME, img)
 
         # data
-        data = {'Plate Number': plate_number, 'Color': car_color, 'Make': '', 'Model': ''}
+        data = {'Plate Number': plate_number, 'Color': car_color}
         print(data)
 
         # Save Video
@@ -111,7 +115,6 @@ def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_N
         # calculate an exponentially decaying average of fps number
         fps = curr_fps if fps == 0.0 else (fps*0.95 + curr_fps*0.05)
         tic = toc
-        #time.sleep(3)
         key = cv2.waitKey(1)
         if key == 27:  # ESC key: quit program
             break
@@ -152,14 +155,11 @@ def main():
     backend_hostname = config['Backend']['hostname']
     backend_port = config['Backend']['port']
     backend_endpoint_getplates = config['Backend']['get_plate_endpoint']
+    backend_endpoint_car = config['Backend']['car_endpoint']
+    backend_endpoint_plate = config['Backend']['plate_endpoint']
     #backend_endpoint_ai = config['Backend']['ai']
     get_plate_address = 'http://{}:{}/{}'.format(backend_hostname, backend_port, backend_endpoint_getplates)
     address = 'http://{}:{}'.format(backend_hostname, backend_port)
-
-    # Initialize database connection to fetch carplates data
-    # registered_plates = requests.get(get_plate_address)
-    # Dummy 
-    
 
     # Initialize detector
     h = w = int(416)
@@ -170,7 +170,7 @@ def main():
     WINDOW_NAME = 'Car Gate'
     open_window(WINDOW_NAME, 'Car Gate', cam.img_width, cam.img_height)
     # Start looping
-    loop_and_detect(cam, carAndLP_trt_yolo, conf_th=0.9, save=args.save, vidwritter=out, prev_box=prev_box, WINDOW_NAME=WINDOW_NAME, address=address)
+    loop_and_detect(cam, carAndLP_trt_yolo, conf_th=0.9, save=args.save, vidwritter=out, prev_box=prev_box, WINDOW_NAME=WINDOW_NAME, address=address, backend_endpoint_plate=backend_endpoint_plate, backend_endpoint_car=backend_endpoint_car, backend_endpoint_getplates=backend_endpoint_getplates)
     
     # After loop release all resources
     cam.release()
