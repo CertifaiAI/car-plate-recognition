@@ -50,29 +50,28 @@ async def updateRecords(recordsDM: records):
     return "Data Received!"
 
 
-def base64Img_cv2Img(base64Img):
-    # decode base64
-    bytes_decoded = base64.b64decode(base64Img)
-    # decode io
-    buffer = io.BytesIO(bytes_decoded)
-    # decode back to cv2
-    decoded_img = cv2.imdecode(np.frombuffer(buffer.getbuffer(), np.uint8), -1)
-    return decoded_img
+# @app.post("/ai")
+# async def aiProcess(inputs: ai_process):
+#     print(inputs)
+#     # convert img back 
+#     carImg = base64Img_cv2Img(inputs.carImg)
+#     # convert plate back
+#     plateImg = base64Img_cv2Img(inputs.plateImg) 
+#     plate_number = recognizePlate(plateImg)
+#     car_color = colorID(carImg)
+#     return plate_number, car_color
 
-@app.post("/ai")
-async def aiProcess(inputs: ai_process):
-    print(inputs)
-    # convert img back 
-    carImg = base64Img_cv2Img(inputs.carImg)
-    # convert plate back
-    plateImg = base64Img_cv2Img(inputs.plateImg) 
-    plate_number = recognizePlate(plateImg)
-    car_color = colorID(carImg)
-    return plate_number, car_color
-
-@app.post("/testimage")
-async def image(inputs:image):
+@app.post("/car")
+async def carImage(inputs:image):
     # print(inputs.image)
     carImg = base64Img_cv2Img(inputs.image)
     car_color = colorID(carImg, 3)
     return car_color
+
+@app.post("/plate")
+async def plateImage(inputs:image):
+    # print(inputs.image)
+    plateImg = base64Img_cv2Img(inputs.image)
+    # recognize plate
+    
+    return plate_number
