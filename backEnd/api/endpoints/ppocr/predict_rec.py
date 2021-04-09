@@ -31,30 +31,33 @@ import utility
 from postprocess import build_post_process
 
 class TextRecognizer(object):
-    def __init__(self, args):
-        self.rec_image_shape = [int(v) for v in args.rec_image_shape.split(",")]
-        self.character_type = args.rec_char_type
-        self.rec_batch_num = args.rec_batch_num
-        self.rec_algorithm = args.rec_algorithm
+    def __init__(self):
+        self.rec_image_shape = [int(v) for v in ("3, 32, 320").split(",")]
+        self.character_type = 'ch'
+        self.rec_batch_num = 6
+        self.rec_algorithm = 'CRNN'
+        cwd = os.getcwd()
+        self.rec_char_dict_path = cwd + '/ppocr/data/ppocr_keys_v1.txt'
+        self.use_space_char = True
         postprocess_params = {
             'name': 'CTCLabelDecode',
-            "character_type": args.rec_char_type,
-            "character_dict_path": args.rec_char_dict_path,
-            "use_space_char": args.use_space_char
+            "character_type": self.character_type,
+            "character_dict_path": self.rec_char_dict_path,
+            "use_space_char": self.use_space_char
         }
         if self.rec_algorithm == "SRN":
             postprocess_params = {
                 'name': 'SRNLabelDecode',
-                "character_type": args.rec_char_type,
-                "character_dict_path": args.rec_char_dict_path,
-                "use_space_char": args.use_space_char
+                "character_type": self.character_type,
+                "character_dict_path": self.rec_char_dict_path,
+                "use_space_char": self.use_space_char
             }
         elif self.rec_algorithm == "RARE":
             postprocess_params = {
                 'name': 'AttnLabelDecode',
-                "character_type": args.rec_char_type,
-                "character_dict_path": args.rec_char_dict_path,
-                "use_space_char": args.use_space_char
+                "character_type": self.character_type,
+                "character_dict_path": self.rec_char_dict_path,
+                "use_space_char": self.use_space_char
             }
         self.postprocess_op = build_post_process(postprocess_params)
         self.predictor, self.input_tensor, self.output_tensors = \

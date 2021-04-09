@@ -31,7 +31,7 @@ import predict_det
 
 
 class TextSystem(object):
-    def __init__(self, args):
+    def __init__(self):
         self.text_detector = predict_det.TextDetector()
         self.text_recognizer = predict_rec.TextRecognizer()
         self.drop_score = 0.5
@@ -112,8 +112,8 @@ class TextSystem(object):
             tmp_box = copy.deepcopy(dt_boxes[bno])
             # perscpective transform
             img_crop = self.get_rotate_crop_image(ori_im, tmp_box)
-            cv2.imshow('test',img_crop)
-            cv2.waitKey(0)
+            # cv2.imshow('test',img_crop)
+            # cv2.waitKey(0)
             img_crop_list.append(img_crop)
         # if self.use_angle_cls:
         #     img_crop_list, angle_list, elapse = self.text_classifier(

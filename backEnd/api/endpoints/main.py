@@ -2,17 +2,13 @@ from fastapi import FastAPI
 import sqlite3
 from crud import create, update, delete
 import pandas as pd
-from models.records import records
-from models.ai_process import ai_process
-from models.image import image
-from aiFunctions import colorID, recognizePlate
+from functions import colorID, recoginzed_plate, base64Img_cv2Img
 import numpy as np
 from PIL import Image
 import io
 import base64
 import cv2
-from ppocr.utility import parse_args
-from ppocr.predict_system import TextSystem
+from dataModels import carImage, plateImage
 
 # Connect db + startup
 try:
@@ -31,25 +27,25 @@ app = FastAPI()
 
 # Nano
 # Get carplates data
-@app.get("/carplates")
-async def getCarPlates():
-    # list_of_carplate = return_carplate_list(connection)
-    # print(list_of_carplate)
-    df = pd.read_sql_query("Select * from users", connection)
-    cp_list = df['carplate_no'].tolist()
-    return cp_list
+# @app.get("/carplates")
+# async def getCarPlates():
+#     # list_of_carplate = return_carplate_list(connection)
+#     # print(list_of_carplate)
+#     df = pd.read_sql_query("Select * from users", connection)
+#     cp_list = df['carplate_no'].tolist()
+#     return cp_list
 
-# Update enter records
-@app.post("/enter")
-async def updateRecords(recordsDM: records):
-    update(connection, "enter_records", records=recordsDM)
-    return "Data Received!"
+# # Update enter records
+# @app.post("/enter")
+# async def updateRecords(recordsDM: records):
+#     update(connection, "enter_records", records=recordsDM)
+#     return "Data Received!"
 
-# Update exit records
-@app.post("/exit")
-async def updateRecords(recordsDM: records):
-    update(connection, "exit_records", records=recordsDM)
-    return "Data Received!"
+# # Update exit records
+# @app.post("/exit")
+# async def updateRecords(recordsDM: records):
+#     update(connection, "exit_records", records=recordsDM)
+#     return "Data Received!"
 
 
 # @app.post("/ai")
@@ -64,21 +60,14 @@ async def updateRecords(recordsDM: records):
 #     return plate_number, car_color
 
 @app.post("/car")
-async def carImage(inputs:image):
-    # print(inputs.image)
+async def carImage(inputs:carImage):
     carImg = base64Img_cv2Img(inputs.image)
-    car_color = colorID(carImg, 3)
+    car_color = colorID(carImg, 2)
+    print(car_color)
     return car_color
 
 @app.post("/plate")
-async def plateImage(inputs:image):
-    # print(inputs.image)
+async def plateImage(inputs:plateImage):
     plateImg = base64Img_cv2Img(inputs.image)
-    # initialize system
-    sys = TextSystem(parse_args)
-    # recognize plate
-    dt_boxes, rec_res = sys(plateImg)
-    print(rec_res)
-    for text, score in rec_res:
-            print("{}, {:.3f}".format(text, score))
+    plate_number = recoginzed_plate(plateImg)
     return plate_number

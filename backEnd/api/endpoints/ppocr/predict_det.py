@@ -30,9 +30,8 @@ from data import create_operators, transform
 from postprocess import build_post_process
 
 class TextDetector(object):
-    def __init__(self, args):
-        self.args = args
-        self.det_algorithm = args.det_algorithm
+    def __init__(self):
+        self.det_algorithm = 'DB'
         pre_process_list = [{
             'DetResizeForTest': None
         }, {
@@ -52,26 +51,26 @@ class TextDetector(object):
         postprocess_params = {}
         if self.det_algorithm == "DB":
             postprocess_params['name'] = 'DBPostProcess'
-            postprocess_params["thresh"] = args.det_db_thresh
-            postprocess_params["box_thresh"] = args.det_db_box_thresh
+            postprocess_params["thresh"] = 0.3
+            postprocess_params["box_thresh"] = 0.5
             postprocess_params["max_candidates"] = 1000
-            postprocess_params["unclip_ratio"] = args.det_db_unclip_ratio
-            postprocess_params["use_dilation"] = args.use_dilation
+            postprocess_params["unclip_ratio"] = 1.6
+            postprocess_params["use_dilation"] = False
         elif self.det_algorithm == "EAST":
             postprocess_params['name'] = 'EASTPostProcess'
-            postprocess_params["score_thresh"] = args.det_east_score_thresh
-            postprocess_params["cover_thresh"] = args.det_east_cover_thresh
-            postprocess_params["nms_thresh"] = args.det_east_nms_thresh
+            postprocess_params["score_thresh"] = 0.8
+            postprocess_params["cover_thresh"] = 0.1
+            postprocess_params["nms_thresh"] = 0.2
         elif self.det_algorithm == "SAST":
             pre_process_list[0] = {
                 'DetResizeForTest': {
-                    'resize_long': args.det_limit_side_len
+                    'resize_long': 960
                 }
             }
             postprocess_params['name'] = 'SASTPostProcess'
-            postprocess_params["score_thresh"] = args.det_sast_score_thresh
-            postprocess_params["nms_thresh"] = args.det_sast_nms_thresh
-            self.det_sast_polygon = args.det_sast_polygon
+            postprocess_params["score_thresh"] = 0.5
+            postprocess_params["nms_thresh"] = 0.2
+            self.det_sast_polygon = False
             if self.det_sast_polygon:
                 postprocess_params["sample_pts_num"] = 6
                 postprocess_params["expand_scale"] = 1.2
