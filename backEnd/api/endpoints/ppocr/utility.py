@@ -89,45 +89,44 @@ def parse_args():
     return parser.parse_args()
 
 
-def create_predictor(args, mode, logger):
+def create_predictor(args, mode):
+    current_cwd = os.getcwd()
     if mode == "det":
-        model_dir = args.det_model_dir
-    elif mode == 'cls':
-        model_dir = args.cls_model_dir
+        model_dir = current_cwd + '/ppocr/weights/ch_ppocr_mobile_v2.0_det_infer/'
     else:
-        model_dir = args.rec_model_dir
+        model_dir = current_cwd + '/ppocr/weights/ch_ppocr_mobile_v2.0_rec_infer/'
 
     if model_dir is None:
-        logger.info("not find {} model file path {}".format(mode, model_dir))
+        print("not find {} model file path {}".format(mode, model_dir))
         sys.exit(0)
     model_file_path = model_dir + "/inference.pdmodel"
     params_file_path = model_dir + "/inference.pdiparams"
     if not os.path.exists(model_file_path):
-        logger.info("not find model file path {}".format(model_file_path))
+        print("not find model file path {}".format(model_file_path))
         sys.exit(0)
     if not os.path.exists(params_file_path):
-        logger.info("not find params file path {}".format(params_file_path))
+        print("not find params file path {}".format(params_file_path))
         sys.exit(0)
 
     config = inference.Config(model_file_path, params_file_path)
 
-    if args.use_gpu:
-        config.enable_use_gpu(args.gpu_mem, 0)
-        if args.use_tensorrt:
-            config.enable_tensorrt_engine(
-                precision_mode=inference.PrecisionType.Half
-                if args.use_fp16 else inference.PrecisionType.Float32,
-                max_batch_size=args.max_batch_size)
-    else:
-        config.disable_gpu()
-        config.set_cpu_math_library_num_threads(6)
-        if args.enable_mkldnn:
-            # cache 10 different shapes for mkldnn to avoid memory leak
-            config.set_mkldnn_cache_capacity(10)
-            config.enable_mkldnn()
-            #  TODO LDOUBLEV: fix mkldnn bug when bach_size  > 1
-            #config.set_mkldnn_op({'conv2d', 'depthwise_conv2d', 'pool2d', 'batch_norm'})
-            args.rec_batch_num = 1
+    # if args.use_gpu:
+    #     config.enable_use_gpu(args.gpu_mem, 0)
+    #     if args.use_tensorrt:
+    #         config.enable_tensorrt_engine(
+    #             precision_mode=inference.PrecisionType.Half
+    #             if args.use_fp16 else inference.PrecisionType.Float32,
+    #             max_batch_size=args.max_batch_size)
+    # else:
+    config.disable_gpu()
+    config.set_cpu_math_library_num_threads(6)
+        # if args.enable_mkldnn:
+        #     # cache 10 different shapes for mkldnn to avoid memory leak
+        #     config.set_mkldnn_cache_capacity(10)
+        #     config.enable_mkldnn()
+        #     #  TODO LDOUBLEV: fix mkldnn bug when bach_size  > 1
+        #     #config.set_mkldnn_op({'conv2d', 'depthwise_conv2d', 'pool2d', 'batch_norm'})
+        #     args.rec_batch_num = 1
 
     # enable memory optim
     config.enable_memory_optim()
@@ -379,25 +378,3 @@ def draw_boxes(image, boxes, scores=None, drop_score=0.5):
         box = np.reshape(np.array(box), [-1, 1, 2]).astype(np.int64)
         image = cv2.polylines(np.array(image), [box], True, (255, 0, 0), 2)
     return image
-
-
-if __name__ == '__main__':
-    test_img = "./doc/test_v2"
-    predict_txt = "./doc/predict.txt"
-    f = open(predict_txt, 'r')
-    data = f.readlines()
-    img_path, anno = data[0].strip().split('\t')
-    img_name = os.path.basename(img_path)
-    img_path = os.path.join(test_img, img_name)
-    image = Image.open(img_path)
-
-    data = json.loads(anno)
-    boxes, txts, scores = [], [], []
-    for dic in data:
-        boxes.append(dic['points'])
-        txts.append(dic['transcription'])
-        scores.append(round(dic['scores'], 3))
-
-    new_img = draw_ocr(image, boxes, txts, scores)
-
-    cv2.imwrite(img_name, new_img)

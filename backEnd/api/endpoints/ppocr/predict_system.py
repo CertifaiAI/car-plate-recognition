@@ -29,6 +29,7 @@ import utility
 import predict_rec
 import predict_det
 
+
 class TextSystem(object):
     def __init__(self, args):
         self.text_detector = predict_det.TextDetector()

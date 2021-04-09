@@ -11,6 +11,8 @@ from PIL import Image
 import io
 import base64
 import cv2
+from ppocr.utility import parse_args
+from ppocr.predict_system import TextSystem
 
 # Connect db + startup
 try:
@@ -73,5 +75,5 @@ async def plateImage(inputs:image):
     # print(inputs.image)
     plateImg = base64Img_cv2Img(inputs.image)
     # recognize plate
-    
+    sys = TextSystem(parse_args)
     return plate_number
