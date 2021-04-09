@@ -27,13 +27,8 @@ import time
 import traceback
 import paddle
 
-import tools.infer.utility as utility
-from ppocr.postprocess import build_post_process
-from ppocr.utils.logging import get_logger
-from ppocr.utils.utility import get_image_file_list, check_and_read_gif
-
-logger = get_logger()
-
+import utility
+from postprocess import build_post_process
 
 class TextRecognizer(object):
     def __init__(self, args):
@@ -63,7 +58,7 @@ class TextRecognizer(object):
             }
         self.postprocess_op = build_post_process(postprocess_params)
         self.predictor, self.input_tensor, self.output_tensors = \
-            utility.create_predictor(args, 'rec', logger)
+            utility.create_predictor('rec')
 
     def resize_norm_img(self, img, max_wh_ratio):
         imgC, imgH, imgW = self.rec_image_shape
@@ -244,38 +239,3 @@ class TextRecognizer(object):
             elapse += time.time() - starttime
         return rec_res, elapse
 
-
-def main(args):
-    image_file_list = get_image_file_list(args.image_dir)
-    text_recognizer = TextRecognizer(args)
-    valid_image_file_list = []
-    img_list = []
-    for image_file in image_file_list:
-        img, flag = check_and_read_gif(image_file)
-        if not flag:
-            img = cv2.imread(image_file)
-        if img is None:
-            logger.info("error in loading image:{}".format(image_file))
-            continue
-        valid_image_file_list.append(image_file)
-        img_list.append(img)
-    try:
-        rec_res, predict_time = text_recognizer(img_list)
-    except:
-        logger.info(traceback.format_exc())
-        logger.info(
-            "ERROR!!!! \n"
-            "Please read the FAQ：https://github.com/PaddlePaddle/PaddleOCR#faq \n"
-            "If your model has tps module:  "
-            "TPS does not support variable shape.\n"
-            "Please set --rec_image_shape='3,32,100' and --rec_char_type='en' ")
-        exit()
-    for ino in range(len(img_list)):
-        logger.info("Predicts of {}:{}".format(valid_image_file_list[ino],
-                                               rec_res[ino]))
-    logger.info("Total predict time for {} images, cost: {:.3f}".format(
-        len(img_list), predict_time))
-
-
-if __name__ == "__main__":
-    main(utility.parse_args())
