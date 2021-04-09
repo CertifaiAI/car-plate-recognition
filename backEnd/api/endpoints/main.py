@@ -63,7 +63,6 @@ app = FastAPI()
 async def carImage(inputs:carImage):
     carImg = base64Img_cv2Img(inputs.image)
     car_color = colorID(carImg, 2)
-    print(car_color)
     return car_color
 
 @app.post("/plate")

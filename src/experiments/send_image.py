@@ -17,8 +17,8 @@ def cv2Img_base64Img(cv2Img):
 
 
 
-image = cv2.imread('/home/nexlson/Skymind/Cargate/car-plate-recognition/src/lp3.jpg')
-# image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+image = cv2.imread('/home/nexlson/Skymind/Cargate/car-plate-recognition/src/croppedCar.jpg')
+image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 test = cv2Img_base64Img(image)
 # print(test)
 # retval, buffer = cv2.imencode('.jpg', image)

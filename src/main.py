@@ -71,9 +71,10 @@ def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_N
                     # Crop car plate
                     cropped_plate = crop_plate(img=img, boxes=boxes, clss=clss)
                     # Data
-                    # encode
+                    # convert colors
                     cropped_car = cv2.cvtColor(cropped_car, cv2.COLOR_BGR2RGB)
                     cropped_plate = cv2.cvtColor(cropped_plate, cv2.COLOR_BGR2RGB)
+                    # covert to base64
                     car_encoded = cv2Img_base64Img(cropped_car)
                     plate_encoded = cv2Img_base64Img(cropped_plate)
                     carData = {'image': car_encoded}

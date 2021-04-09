@@ -31,11 +31,13 @@ def get_colour_name(requested_colour):
     return actual_name, closest_name
 
 def get_bottom_half_img(img):
-
-    return cropped_image
+    # crop image and take bottom half
+    cropped_img = img[int(img.shape[0]/2):int(img.shape[0])]
+    return cropped_img
 
 def colorID(img, NUM_CLUSTERS):
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img = get_bottom_half_img(img)
     im = Image.fromarray(img)
     im = im.resize((150, 150)) 
     ar = np.asarray(im)
