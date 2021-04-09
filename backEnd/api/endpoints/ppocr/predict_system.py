@@ -73,7 +73,7 @@ class TextSystem(object):
         bbox_num = len(img_crop_list)
         for bno in range(bbox_num):
             cv2.imwrite("./output/img_crop_%d.jpg" % bno, img_crop_list[bno])
-            logger.info(bno, rec_res[bno])
+            # logger.info(bno, rec_res[bno])
 
     def sorted_boxes(self, dt_boxes):
         """
@@ -100,8 +100,8 @@ class TextSystem(object):
         ori_im = img.copy()
         # detection
         dt_boxes, elapse = self.text_detector(img)
-        logger.info("dt_boxes num : {}, elapse : {}".format(
-            len(dt_boxes), elapse))
+        # logger.info("dt_boxes num : {}, elapse : {}".format(
+        #     len(dt_boxes), elapse))
         if dt_boxes is None:
             return None, None
         img_crop_list = []
@@ -125,8 +125,8 @@ class TextSystem(object):
         # Recognition starts
         rec_res, elapse = self.text_recognizer(img_crop_list)
         # print(rec_res)
-        logger.info("rec_res num  : {}, elapse : {}".format(
-            len(rec_res), elapse))
+        # logger.info("rec_res num  : {}, elapse : {}".format(
+        #     len(rec_res), elapse))
         # self.print_draw_crop_rec_res(img_crop_list, rec_res)
         filter_boxes, filter_rec_res = [], []
         for box, rec_reuslt in zip(dt_boxes, rec_res):
@@ -136,54 +136,3 @@ class TextSystem(object):
                 filter_rec_res.append(rec_reuslt)
         return filter_boxes, filter_rec_res
 
-# def main(args):
-#     image_file_list = get_image_file_list(args.image_dir)
-#     text_sys = TextSystem(args)
-#     is_visualize = True
-#     font_path = args.vis_font_path
-#     drop_score = args.drop_score
-#     for image_file in image_file_list:
-#         img, flag = check_and_read_gif(image_file)
-#         if not flag:
-#             img = cv2.imread(image_file)
-#         if img is None:
-#             logger.info("error in loading image:{}".format(image_file))
-#             continue
-#         starttime = time.time()
-#         # recog starts
-#         dt_boxes, rec_res = text_sys(img)
-#         # print(rec_res[0][0])
-#         elapse = time.time() - starttime
-#         logger.info("Predict time of %s: %.3fs" % (image_file, elapse))
-
-#         # text recognition score
-#         for text, score in rec_res:
-#             logger.info("{}, {:.3f}".format(text, score))
-
-#         if is_visualize:
-#             image = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-#             boxes = dt_boxes
-#             txts = [rec_res[i][0] for i in range(len(rec_res))]
-#             scores = [rec_res[i][1] for i in range(len(rec_res))]
-
-#             draw_img = draw_ocr_box_txt(
-#                 image,
-#                 boxes,
-#                 txts,
-#                 scores,
-#                 drop_score=drop_score,
-#                 font_path=font_path)
-#             draw_img_save = "./inference_results/"
-#             if not os.path.exists(draw_img_save):
-#                 os.makedirs(draw_img_save)
-#             if flag:
-#                 image_file = image_file[:-3] + "png" 
-#             cv2.imwrite(
-#                 os.path.join(draw_img_save, os.path.basename(image_file)),
-#                 draw_img[:, :, ::-1])
-#             logger.info("The visualized image saved in {}".format(
-#                 os.path.join(draw_img_save, os.path.basename(image_file))))
-
-
-# if __name__ == "__main__":
-#     main(utility.parse_args())

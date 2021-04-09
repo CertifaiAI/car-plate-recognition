@@ -74,6 +74,11 @@ async def carImage(inputs:image):
 async def plateImage(inputs:image):
     # print(inputs.image)
     plateImg = base64Img_cv2Img(inputs.image)
-    # recognize plate
+    # initialize system
     sys = TextSystem(parse_args)
+    # recognize plate
+    dt_boxes, rec_res = sys(plateImg)
+    print(rec_res)
+    for text, score in rec_res:
+            print("{}, {:.3f}".format(text, score))
     return plate_number
