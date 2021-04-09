@@ -48,18 +48,6 @@ async def getCarPlates():
 #     update(connection, "exit_records", records=recordsDM)
 #     return "Data Received!"
 
-
-# @app.post("/ai")
-# async def aiProcess(inputs: ai_process):
-#     print(inputs)
-#     # convert img back 
-#     carImg = base64Img_cv2Img(inputs.carImg)
-#     # convert plate back
-#     plateImg = base64Img_cv2Img(inputs.plateImg) 
-#     plate_number = recognizePlate(plateImg)
-#     car_color = colorID(carImg)
-#     return plate_number, car_color
-
 @app.post("/car")
 async def carImage(inputs:carImage):
     carImg = base64Img_cv2Img(inputs.image)

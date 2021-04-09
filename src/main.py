@@ -13,6 +13,30 @@ import requests
 import json
 import configparser
 import base64
+import datetime
+
+
+
+# Config Parser
+config = configparser.ConfigParser()
+config.read('settings.ini')
+# get backend config
+backend_hostname = config['Backend']['hostname']
+backend_port = config['Backend']['port']
+backend_endpoint_getplates = config['Backend']['get_plate_endpoint']
+backend_endpoint_car = config['Backend']['car_endpoint']
+backend_endpoint_plate = config['Backend']['plate_endpoint']
+#backend_endpoint_ai = config['Backend']['ai']
+get_plate_address = 'http://{}:{}/{}'.format(backend_hostname, backend_port, backend_endpoint_getplates)
+address = 'http://{}:{}'.format(backend_hostname, backend_port)
+# thingsboard 
+thingsboard_hostname = config['ThingsBoard']['hostname']
+thingsboard_port = config['ThingsBoard']['port']
+thingsboard_endpoint = config['ThingsBoard']['endpoint']
+thingsboard_entrytoken = config['ThingsBoard']['entry_token']
+thingsboard_exittoken = config['ThingsBoard']['exit_token']
+thingsboard_extra = config['ThingsBoard']['extra_end']
+
 
 def parse_args():
     """Parse input arguments."""
@@ -30,7 +54,7 @@ def parse_args():
     return args
 
 
-def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_NAME, address, backend_endpoint_plate, backend_endpoint_car, backend_endpoint_getplates):
+def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_NAME):
     """Continuously capture images from camera and do object detection.
 
     # Arguments
@@ -76,22 +100,34 @@ def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_N
                     # convert colors
                     cropped_car = cv2.cvtColor(cropped_car, cv2.COLOR_BGR2RGB)
                     cropped_plate = cv2.cvtColor(cropped_plate, cv2.COLOR_BGR2RGB)
-                    # covert to base64
+                    # convert to base64
                     car_encoded = cv2Img_base64Img(cropped_car)
                     plate_encoded = cv2Img_base64Img(cropped_plate)
                     carData = {'image': car_encoded}
                     plateData = {'image': plate_encoded}
                     # Send request to server
-                    carResponses= requests.post(address+backend_endpoint_car, data=json.dumps(carData))
-                    # print(str(carResponses.text))
-                    car_color = str(carResponses.text)
-                    plateResponses= requests.post(address+backend_endpoint_plate, data=json.dumps(plateData))
-                    # print(str(plateResponses.text))
-                    plate_number = str(plateResponses.text)
+                    try:
+                        plateResponses= requests.post(address+backend_endpoint_plate, data=json.dumps(plateData))
+                        carResponses= requests.post(address+backend_endpoint_car, data=json.dumps(carData))
+                        car_color = str(carResponses.text)
+                        plate_number = str(plateResponses.text)
+                    except:
+                        print('Unable to connect to backend server')
                     # Make decision based on plate number
                     if plate_number in registered_plates:
                         print("Allow access and open gate for {}".format(plate_number))
-                        # Open gate 
+                        # Open gate (activate motors)
+                        # Send to thingsboard server
+                        entryParking = 'http://' + thingsboard_hostname + ':' + thingsboard_port + thingsboard_endpoint + thingsboard_entrytoken + thingsboard_extra
+                        # exitParking = 'http://' + thingsboard_hostname +': + 'thingsboard_port + thingsboard_endpoint + thingsboard_exittoken + thingsboard_extra
+                        current_time = str(datetime.datetime.now())
+                        entry_records = {'plate number': str(plate_number), 'entry_time': current_time}
+                        # exit_records = {'plate number': str(plate_number), 'exit_time': current_time}
+                        try:
+                            response = requests.post(entryParking, data=json.dumps(entry_records))
+                            # response = requests.post(exitParking, data=json.dumps(exit_records))
+                        except:
+                            print('Cannot connect to thingsboard server')
                     else:
                         print("Access denied and not open gate")
                     # Visualize on frame with all data
@@ -146,20 +182,6 @@ def main():
     if not cam.isOpened():
         raise SystemExit('ERROR: failed to open camera!')
 
-
-    # Config Parser
-    config = configparser.ConfigParser()
-    config.read('settings.ini')
-    # get backend config
-    backend_hostname = config['Backend']['hostname']
-    backend_port = config['Backend']['port']
-    backend_endpoint_getplates = config['Backend']['get_plate_endpoint']
-    backend_endpoint_car = config['Backend']['car_endpoint']
-    backend_endpoint_plate = config['Backend']['plate_endpoint']
-    #backend_endpoint_ai = config['Backend']['ai']
-    get_plate_address = 'http://{}:{}/{}'.format(backend_hostname, backend_port, backend_endpoint_getplates)
-    address = 'http://{}:{}'.format(backend_hostname, backend_port)
-
     # Initialize detector
     h = w = int(416)
     carAndLP_model = 'lpandcar-yolov4-tiny-416'
@@ -169,7 +191,7 @@ def main():
     WINDOW_NAME = 'Car Gate'
     open_window(WINDOW_NAME, 'Car Gate', cam.img_width, cam.img_height)
     # Start looping
-    loop_and_detect(cam, carAndLP_trt_yolo, conf_th=0.9, save=args.save, vidwritter=out, prev_box=prev_box, WINDOW_NAME=WINDOW_NAME, address=address, backend_endpoint_plate=backend_endpoint_plate, backend_endpoint_car=backend_endpoint_car, backend_endpoint_getplates=backend_endpoint_getplates)
+    loop_and_detect(cam, carAndLP_trt_yolo, conf_th=0.9, save=args.save, vidwritter=out, prev_box=prev_box, WINDOW_NAME=WINDOW_NAME)
     
     # After loop release all resources
     cam.release()
