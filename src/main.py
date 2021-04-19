@@ -72,11 +72,8 @@ def loop_and_detect(cam, trt_yolo, conf_th, save, vidwritter, prev_box, WINDOW_N
     # Initialize database connection to fetch carplates data
     registered_plates = requests.get(address+backend_endpoint_getplates)
     while True:
-<<<<<<< HEAD
         
 
-=======
->>>>>>> dbac66bfdda3b6ecb5d983606d4b7e1d79d9e030
         if cv2.getWindowProperty(WINDOW_NAME, 0) < 0:
             break
         img = cam.read()
