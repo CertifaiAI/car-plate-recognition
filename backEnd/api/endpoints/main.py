@@ -9,7 +9,7 @@ import io
 import base64
 import cv2
 from dataModels import carImage, plateImage
-
+import time
 # Connect db + startup
 try:
     connection = sqlite3.connect("ALNP.db")
@@ -33,7 +33,7 @@ async def getCarPlates():
     # print(list_of_carplate)
     # df = pd.read_sql_query("Select * from users", connection)
     # cp_list = df['carplate_no'].tolist()
-    plates = ['WYQ8233', 'WHY1612']
+    plates = ['WYQ8233', 'WHY1612', 'VDS2875']
     return plates
 
 # # Update enter records
@@ -50,12 +50,16 @@ async def getCarPlates():
 
 @app.post("/car")
 async def carImage(inputs:carImage):
+    start_time = time.time()
     carImg = base64Img_cv2Img(inputs.image)
     car_color = colorID(carImg, 2)
+    print('Car Color Execution: %s seconds'% (time.time() - start_time))
     return car_color
 
 @app.post("/plate")
 async def plateImage(inputs:plateImage):
+    start_time = time.time()
     plateImg = base64Img_cv2Img(inputs.image)
     plate_number = recoginzed_plate(plateImg)
+    print('Plate Recognition Execution: %s seconds'% (time.time() - start_time))
     return plate_number
