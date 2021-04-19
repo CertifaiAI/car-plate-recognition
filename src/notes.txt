@@ -5,3 +5,5 @@
 
 barrier gate
 https://globalperimetersolutions.com/product/manual-boom-gate/
+
+uvicorn --host 0.0.0.0 main:app --reload
