@@ -1,0 +1,5 @@
+sysadmin@thingsboard.org / sysadmin
+
+tenant@thingsboard.org / tenant
+
+customer@thingsboard.org / customer
