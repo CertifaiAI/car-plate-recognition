@@ -8,3 +8,8 @@ backEnd/api/endpoints/__pycache__
 backEnd/api/endpoints/ppocr/__pycache__
 backEnd/api/endpoints/ppocr/data/__pycache__
 backEnd/api/endpoints/ppocr/postprocess/__pycache__
+
+# video processing 
+video_processing/dep/
+video_processing/images/
+video_processing/dashcam.MP4
