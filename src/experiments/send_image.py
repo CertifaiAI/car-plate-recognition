@@ -5,6 +5,7 @@ import json
 from PIL import Image
 import io
 import numpy as np
+from datetime import datetime
 
 def cv2Img_base64Img(cv2Img):
     # array to Pil
@@ -14,20 +15,16 @@ def cv2Img_base64Img(cv2Img):
     image.save(buffer, format="JPEG")
     return base64.b64encode(buffer.getvalue()).decode('ascii')
 
-
-
-
-image = cv2.imread('/home/nexlson/Skymind/Cargate/car-plate-recognition/src/croppedCar.jpg')
-image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-test = cv2Img_base64Img(image)
-# print(test)
-# retval, buffer = cv2.imencode('.jpg', image)
-# print(buffer)
-# jpg_as_text = base64.b64encode(buffer)
-# print(jpg_as_text)
-data = {'image': test}
+carImage = cv2.imread('/home/nexlson/Skymind/Cargate/car-plate-recognition/src/croppedCar.jpg')
+# plateImage = cv2.imread('/home/nexlson/Skymind/Cargate/car-plate-recognition/src/croppedPlate.jpg')
+carImage = cv2.cvtColor(carImage, cv2.COLOR_BGR2RGB)
+# plateImage = cv2.cvtColor(plateImage, cv2.COLOR_BGR2RGB)
+carImage = cv2Img_base64Img(carImage)
+# plateImage = cv2Img_base64Img(plateImage)
+entryTime = datetime.now()
+data = {'plate_number': 'PLA6626','carImage': carImage, 'entry_time':str(entryTime)}
 try:
-    response = requests.post('http://10.10.10.35:8000/car', data=json.dumps(data))
+    response = requests.post('http://localhost:8080/api/v1/H4CbOSd0BSMcnGkAqlld/telemetry', data=json.dumps(data))
 except:
     print('failed')
-print(str(response.text))
+print((response.text))
