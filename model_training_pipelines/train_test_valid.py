@@ -1,0 +1,95 @@
+'''
+This Script will perform train-test-valid split for object detection dataset
+'''
+
+import argparse
+import os 
+from random import shuffle
+import shutil
+
+# Specify arguements
+arg = argparse.ArgumentParser()
+arg.add_argument('--dir', help='Path to dataset', required=True, type=str)
+arg.add_argument('--train', help='Ratio for train dataset', default=0.8, type=float)
+arg.add_argument('--test', help='Ratio for test dataset', default=0.2, type=float)
+arg.add_argument('--valid', help='Ratio for valid dataset', default=0.0, type=float)
+arg.add_argument('--train_out', help='Train dataset output path', required=True, type=str)
+arg.add_argument('--test_out', help='Test dataset output path', required=True, type=str)
+arg.add_argument('--valid_out', help='Valid dataset output path', required=True, type=str)
+# arg.add_argument('--annotation', help='Annotation file type', required=True, type=str)
+cfg = arg.parse_args()
+
+def check_dir_exist(path):
+    # Create dir if not exists
+    if not os.path.exists(path):
+        os.makedirs(path)
+        return
+
+def check_ratio(train_ratio, test_ratio, valid_ratio):
+    if not train_ratio + test_ratio + valid_ratio == 1:
+        raise Exception("Please Enter a valid ratio")
+
+def split(train_ratio, test_ratio, valid_ratio, image_files):
+    data_count = len(image_files)
+    train_num = int(data_count * train_ratio)
+    test_num = int(data_count * test_ratio)
+    valid_num = int(data_count * valid_ratio)
+    # Get train data
+    train_data = image_files[:train_num]
+    image_files = image_files[train_num:]
+    # Get test data
+    test_data = image_files[:test_num]
+    image_files = image_files[test_num:]
+    # Get valid data
+    valid_data = image_files[:valid_num]
+    return train_data, test_data, valid_data
+
+def get_file_lists(dir):
+    all_files = os.listdir(os.path.abspath(dir))
+    image_files = []
+    annotation_files = []
+    count = 0
+    for fileName in all_files:
+        if fileName[-3:] == 'jpg':
+            image_files.append(fileName)
+        elif fileName[-3:] == 'txt':
+            annotation_files.append(fileName)
+        count +=1
+    # Shuffle files
+    shuffle(image_files)
+    return image_files, annotation_files, count
+
+# Copy files to folder
+def move_files(ori_dir, data, dest_dir):
+    # Train data
+    for fileName in data:
+        # Images
+        oldPath = ori_dir + '/' + fileName
+        newPath = dest_dir + '/' + fileName
+        shutil.copy(oldPath, newPath)
+        # Annotation
+        annotation_oldPath = ori_dir + '/' + fileName[:-4] + '.txt'
+        annotation_newPath = dest_dir + '/' + fileName[:-4] + '.txt'
+        shutil.copy(annotation_oldPath, annotation_newPath)
+
+
+def main():
+    # Check correct ratio
+    check_ratio(cfg.train, cfg.test, cfg.valid)
+    # Check entered path exists or not
+    check_dir_exist(cfg.train_out)
+    check_dir_exist(cfg.test_out)
+    check_dir_exist(cfg.valid_out)
+    # Get files from directory
+    images, annotations, counts = get_file_lists(cfg.dir)
+    print('Total number of images detected: {}'.format(len(images)))
+    # Split files
+    train_data, test_data, valid_data = split(cfg.train, cfg.test, cfg.valid, images)
+    # Copy files into train test valid folder
+    move_files(cfg.dir, train_data, cfg.train_out)
+    move_files(cfg.dir, test_data, cfg.test_out)
+    move_files(cfg.dir, valid_data, cfg.valid_out)
+    # Zip the folder
+
+if __name__ == '__main__':
+    main()

@@ -5,7 +5,7 @@ import json
 from PIL import Image
 import io
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def cv2Img_base64Img(cv2Img):
     # array to Pil
@@ -21,10 +21,19 @@ carImage = cv2.cvtColor(carImage, cv2.COLOR_BGR2RGB)
 # plateImage = cv2.cvtColor(plateImage, cv2.COLOR_BGR2RGB)
 carImage = cv2Img_base64Img(carImage)
 # plateImage = cv2Img_base64Img(plateImage)
-entryTime = datetime.now()
-data = {'plate_number': 'PLA6626','carImage': carImage, 'entry_time':str(entryTime)}
+# entryTime = datetime.now()
+# exitTime = datetime.now() + timedelta(hours=3)
+# data = {'plate_number': 'PLA6626','carImage': carImage, 'entry_time':str(entryTime)}
+# data = {'plate_number': '','carImage': carImage, 'entertime':'', 'exittime':''}
+entryTime = '2021-04-06 09:32:29'
+exitTime =  ''
+plate_number = 'PLA6626'
+auth = 'True'
+
+
+data = {'plate_number': plate_number,'carImage': carImage, 'entertime':str(entryTime), 'exittime':str(exitTime), 'Authenticated':auth}
 try:
-    response = requests.post('http://localhost:8080/api/v1/H4CbOSd0BSMcnGkAqlld/telemetry', data=json.dumps(data))
+    response = requests.post('http://localhost:8080/api/v1/tngSC38jlSwK7icJV2j0/telemetry', data=json.dumps(data))
 except:
     print('failed')
 print((response.text))
