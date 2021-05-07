@@ -5,6 +5,15 @@
 2. Van 
 3. NumberPlate
 
+## Data Augmentation 
+Currently there are 4 types of augmentations using the script, you can add up the methods to get different result
+
+There are 4 augmentation methods
+1. Add noise
+2. Add brightness or remove brightness
+3. Rotate
+4. Horizontal Flip
+
 ## Train, Test, Split scripts for object detections
 python train_test_valid.py --dir experiments --train_out train --test_out test --valid_out valid
 dir         = directory of database

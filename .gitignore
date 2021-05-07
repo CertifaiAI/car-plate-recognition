@@ -14,5 +14,8 @@ video_processing/dep/
 video_processing/images/
 video_processing/dashcam.MP4
 
+# src
+src/experiments
+
 # model training pipeline
 model_training_pipelines/experiments

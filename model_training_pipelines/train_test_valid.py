@@ -34,6 +34,9 @@ def split(train_ratio, test_ratio, valid_ratio, image_files):
     train_num = int(data_count * train_ratio)
     test_num = int(data_count * test_ratio)
     valid_num = int(data_count * valid_ratio)
+    print("Training dataset will have {} images".format(train_num))
+    print("Test dataset will have {} images".format(test_num))
+    print("Valid dataset will have {} images".format(valid_num))
     # Get train data
     train_data = image_files[:train_num]
     image_files = image_files[train_num:]
