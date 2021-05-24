@@ -1,5 +1,15 @@
-## Automatic License Plate Recognition Implementation on Jetson Nano
-#### The system is built using yolov4-tiny with tensorRT (car and license plate detector) [Reference 1] and crnn (license plate recognition) [Reference 2]
+## CarGate 
+### Automatic License Plate Recognition System on Jetson Nano
+#### The system is built using yolov4-tiny with tensorRT (vehicle and license plate detector) [Reference 1] and PPOCR (OCR) [Reference 2]
+
+### ** Project Structure**
+Jetson Nano
+- Run object detection model (Yolov4-tiny) to detect vehicle and vehicle plate
+- The model will be able to detect Car, Van and licence plate
+
+Server
+- Run OCR(PPOCR) on vehicle plate
+- Run Thingsboard FrontEnd
 
 ### **Prerequisite**
 #### 1. Requires TensorRT 6.x+
@@ -20,7 +30,7 @@ $ ./install_pytorch.sh
 
 #### 4. Build plugin 
 ```
-$ cd plugins
+$ cd src/plugins
 $ make
 ```
 
