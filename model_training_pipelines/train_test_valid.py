@@ -53,7 +53,7 @@ def get_file_lists(dir):
     annotation_files = []
     count = 0
     for fileName in all_files:
-        if fileName[-3:] == 'jpg' or fileName[-4:] == 'jpeg':
+        if fileName[-3:] == 'jpg' or fileName[-4:] == 'jpeg' or fileName[-3:] == 'png' or fileName[-3:] == 'JPG':
             image_files.append(fileName)
         elif fileName[-3:] == 'txt':
             annotation_files.append(fileName)
@@ -70,12 +70,14 @@ def move_files(ori_dir, data, dest_dir):
         oldPath = ori_dir + '/' + fileName
         newPath = dest_dir + '/' + fileName
         shutil.copy(oldPath, newPath)
+        # remove .jpeg from filename to get annotation filename
         if fileName[-4:] == 'jpeg':
             annotation_oldPath = ori_dir + '/' + fileName[:-5] + '.txt'
             annotation_newPath = dest_dir + '/' + fileName[:-5] + '.txt'
             shutil.copy(annotation_oldPath, annotation_newPath)
             return
         # Annotation
+        # remove .png or .jpg from filename to get annotation filename
         annotation_oldPath = ori_dir + '/' + fileName[:-4] + '.txt'
         annotation_newPath = dest_dir + '/' + fileName[:-4] + '.txt'
         shutil.copy(annotation_oldPath, annotation_newPath)
