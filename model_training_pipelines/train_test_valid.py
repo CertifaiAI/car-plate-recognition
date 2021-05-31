@@ -10,9 +10,9 @@ import shutil
 # Specify arguements
 arg = argparse.ArgumentParser()
 arg.add_argument('--dir', help='Path to dataset', required=True, type=str)
-arg.add_argument('--train', help='Ratio for train dataset', default=0.8, type=float)
+arg.add_argument('--train', help='Ratio for train dataset', default=0.7, type=float)
 arg.add_argument('--test', help='Ratio for test dataset', default=0.2, type=float)
-arg.add_argument('--valid', help='Ratio for valid dataset', default=0.0, type=float)
+arg.add_argument('--valid', help='Ratio for valid dataset', default=0.1, type=float)
 arg.add_argument('--train_out', help='Train dataset output path', required=True, type=str)
 arg.add_argument('--test_out', help='Test dataset output path', required=True, type=str)
 arg.add_argument('--valid_out', help='Valid dataset output path', required=True, type=str)
@@ -26,14 +26,14 @@ def check_dir_exist(path):
         return
 
 def check_ratio(train_ratio, test_ratio, valid_ratio):
-    if not train_ratio + test_ratio + valid_ratio == 1:
+    if not (round(train_ratio + test_ratio + valid_ratio)) == 1:
         raise Exception("Please Enter a valid ratio")
 
 def split(train_ratio, test_ratio, valid_ratio, image_files):
     data_count = len(image_files)
     train_num = int(data_count * train_ratio)
     test_num = int(data_count * test_ratio)
-    valid_num = int(data_count * valid_ratio)
+    valid_num = int(data_count - train_num - test_num)
     print("Training dataset will have {} images".format(train_num))
     print("Test dataset will have {} images".format(test_num))
     print("Valid dataset will have {} images".format(valid_num))
@@ -53,7 +53,7 @@ def get_file_lists(dir):
     annotation_files = []
     count = 0
     for fileName in all_files:
-        if fileName[-3:] == 'jpg':
+        if fileName[-3:] == 'jpg' or fileName[-4:] == 'jpeg':
             image_files.append(fileName)
         elif fileName[-3:] == 'txt':
             annotation_files.append(fileName)
@@ -70,6 +70,11 @@ def move_files(ori_dir, data, dest_dir):
         oldPath = ori_dir + '/' + fileName
         newPath = dest_dir + '/' + fileName
         shutil.copy(oldPath, newPath)
+        if fileName[-4:] == 'jpeg':
+            annotation_oldPath = ori_dir + '/' + fileName[:-5] + '.txt'
+            annotation_newPath = dest_dir + '/' + fileName[:-5] + '.txt'
+            shutil.copy(annotation_oldPath, annotation_newPath)
+            return
         # Annotation
         annotation_oldPath = ori_dir + '/' + fileName[:-4] + '.txt'
         annotation_newPath = dest_dir + '/' + fileName[:-4] + '.txt'
