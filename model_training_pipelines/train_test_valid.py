@@ -63,24 +63,31 @@ def get_file_lists(dir):
     return image_files, annotation_files, count
 
 # Copy files to folder
-def move_files(ori_dir, data, dest_dir):
+def move_files(ori_dir, data, dest_dir, name):
     # Train data
+    # print((data[0]))
+    count = 0
     for fileName in data:
+        # print(fileName)
         # Images
         oldPath = ori_dir + '/' + fileName
         newPath = dest_dir + '/' + fileName
         shutil.copy(oldPath, newPath)
+
         # remove .jpeg from filename to get annotation filename
         if fileName[-4:] == 'jpeg':
             annotation_oldPath = ori_dir + '/' + fileName[:-5] + '.txt'
             annotation_newPath = dest_dir + '/' + fileName[:-5] + '.txt'
             shutil.copy(annotation_oldPath, annotation_newPath)
-            return
+        elif fileName[-3:] == 'jpg' or fileName[-3:] == 'png' or fileName[-3:] == 'JPG':
         # Annotation
         # remove .png or .jpg from filename to get annotation filename
-        annotation_oldPath = ori_dir + '/' + fileName[:-4] + '.txt'
-        annotation_newPath = dest_dir + '/' + fileName[:-4] + '.txt'
-        shutil.copy(annotation_oldPath, annotation_newPath)
+            # print(fileName[:-4])
+            annotation_oldPath = ori_dir + '/' + fileName[:-4] + '.txt'
+            annotation_newPath = dest_dir + '/' + fileName[:-4] + '.txt'
+            shutil.copy(annotation_oldPath, annotation_newPath)
+        count += 1
+    print('{} images copied to {} folder'.format(count, name))
 
 
 def main():
@@ -96,9 +103,9 @@ def main():
     # Split files
     train_data, test_data, valid_data = split(cfg.train, cfg.test, cfg.valid, images)
     # Copy files into train test valid folder
-    move_files(cfg.dir, train_data, cfg.train_out)
-    move_files(cfg.dir, test_data, cfg.test_out)
-    move_files(cfg.dir, valid_data, cfg.valid_out)
+    move_files(cfg.dir, train_data, cfg.train_out, 'train')
+    move_files(cfg.dir, test_data, cfg.test_out, 'test')
+    move_files(cfg.dir, valid_data, cfg.valid_out, 'valid')
     # Zip the folder
 
 if __name__ == '__main__':
