@@ -14,7 +14,7 @@ sudo apt-get install python3-setuptools
 wget https://nvidia.box.com/shared/static/9eptse6jyly1ggt9axbja2yrmj6pbarc.whl -O torch-1.6.0-cp36-cp36m-linux_aarch64.whl
 sudo apt-get install python3-pip libopenblas-base libopenmpi-dev 
 sudo pip3 install Cython
-sudo pip3 install torch-1.6.0-cp36-cp36m-linux_aarch64.whl
+sudo pip3 install numpy torch-1.6.0-cp36-cp36m-linux_aarch64.whl
 
 #Installing torchvision
 #For latest torchvision refer original Nvidia Jetson Nano thread - https://devtalk.nvidia.com/default/topic/1049071/jetson-nano/pytorch-for-jetson-nano/.
