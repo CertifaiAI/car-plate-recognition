@@ -3,7 +3,7 @@ name: Python & Shell Test
 on:
   push:
     branches:
-      - faris_shell_test
+      - faris_codetest_workflow
 
     pull_request:
       types: [synchronize, review_requested]
