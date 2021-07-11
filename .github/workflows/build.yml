@@ -1,0 +1,19 @@
+name: Shell Test
+
+on:
+  push:
+    branches:
+      - faris_shell_test
+
+jobs:
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run ShellCheck
+      uses: ludeeus/action-shellcheck@master
+      with:
+        severity: error
+
