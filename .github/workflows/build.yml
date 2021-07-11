@@ -52,4 +52,3 @@ jobs:
       uses: ludeeus/action-shellcheck@master
       with:
         severity: error # Set minimum severity to error before it triggers test to fail
-
