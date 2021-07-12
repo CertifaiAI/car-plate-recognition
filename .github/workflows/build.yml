@@ -1,4 +1,4 @@
-name: Python, Shell & Sonar Cloud Test
+name: Python & Shell Script Test
 
 on:
   push:
