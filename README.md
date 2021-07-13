@@ -37,3 +37,4 @@ Detect vehicles using CSI Camera connected to a Jetson Nano and send NumberPlate
 ### **References**
 #### 1. https://github.com/ultralytics/yolov5
 #### 2. https://github.com/PaddlePaddle/PaddleOCR
+#### 3. https://github.com/otamajakusi/dockerfile-yolov5-jetson
