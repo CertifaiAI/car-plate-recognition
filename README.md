@@ -1,23 +1,30 @@
-## Cargate Project Implementation on Jetson Nano
+# Cargate Project Implementation on Jetson Nano
 #### The system is built using yolov5 (objects detector) [Reference 1] and PaddlePaddle OCR (license plate recognition) [Reference 2]
 
-### **Prerequisite**
-#### 1. Install pytorch using the script provided
+The Following scripts work on a Jetson Nano with **JetPack 4.5** image flashed. To download Jetpack 4.5, refer to the following [link](https://developer.nvidia.com/jetpack-sdk-45-archive).
+
+## Steps to Run
+### Change Docker Default Runtime
+This sets ```"default-runtime": "nvidia"``` in ```/etc/docker/daemon.json```
 ```
-$ ./install_pytorch.sh
+./setup.sh
+```
+### Build the Docker Image 
+Note: This should take approximately 3hours to complete
+```
+./build.sh
+```
+### Check Camera is Detected
+Check to insure that the webcam is connected to /dev/video0
+```
+ls -ltrh /dev/video*
+```
+### Inference
+Detect vehicles using CSI Camera connected to a Jetson Nano and send NumberPlate detections over to a FastAPI backend server to perform LPR
+```
+./run.sh
 ```
 
-#### 2. Download required dependencies 
-```
-$ pip3 install -r requirements.txt
-```
-
-#
-
-### **Run program**
-```
-$ python3 main.py
-```
 
 ### **Demo**
 ![car and license plate detection](./result.jpg)
