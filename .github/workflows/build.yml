@@ -5,8 +5,8 @@ on:
     branches:
       - main
 
-    pull_request:
-      types: [synchronize, review_requested]
+  pull_request:
+    branches: '**' # Any PR raised will trigger the workflow by 'opened, synchronize & reopened' events
 
 jobs:
   python_test:
