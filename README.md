@@ -7,8 +7,10 @@ It will be used to detect vehicles including Cars and Vans and send the NumberPl
 
 Python 3.8 or later with all [requirements.txt](requirements.txt) dependencies installed. To install run:
 
+```bash
 $ git clone --branch Carplate-yolov5 https://github.com/CertifaiAI/car-plate-recognition.git  
 $ pip install -r requirements.txt
+```
 
 ### Download Weights
 
