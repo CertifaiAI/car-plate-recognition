@@ -12,7 +12,7 @@ $ pip install -r requirements.txt
 
 ### Download Weights
 
-Due to the Github memory limit, the weights have been uploaded on to Google Drive, please the download the weights and place it inside of the 'weights/' folder
+Due to the Github memory limit, the weights have been uploaded on to [Google Drive](https://drive.google.com/drive/folders/1afPFDv9Fo0GW4W5ss6GWgBGX31iUmn4t), please the download the weights and place it inside of the 'weights/' folder
 
 ### Run Server
 
