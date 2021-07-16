@@ -30,7 +30,7 @@ Before running the scripts make sure to first setup the FastAPI backend server, 
 $ python send_images.py 
 ```
 
-*send_video.py*: Detects vehicles including Cars and Vans and sends the cropped images of the NumberPlate over to a FastAPI backend server to perform LPR. 
+*send_video.py*: Detects vehicles including Cars and Vans and sends cropped images of the NumberPlate over to a FastAPI backend server which performs the LPR. 
 
  ```bash
 $ python send_video.py
