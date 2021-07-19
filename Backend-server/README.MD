@@ -17,3 +17,8 @@ You can send cropped car plate image to the server (from your pc for testing) us
 ```
 response = requests.post('http://localhost:8000/plate', data=json.dumps(data))
 ```
+
+## Common problems
+1. Could not find module 'goes_c.dll'
+- Download the goes_c.dll from [here](https://www.dll-files.com/geos_c.dll.html)
+- put the dll file into your python lib
