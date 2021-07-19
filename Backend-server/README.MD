@@ -6,6 +6,10 @@ This FastAPI server is used to process PPOCR in PC. You can send cropped car pla
 pip3 install -r requirements
 ```
 
+## Weights for PPOCR
+Please download the weights from [here](https://drive.google.com/drive/folders/1IIJOGPCsX21uGJEoyqGvSQjv3jxedgKn?usp=sharing) and put both folder into the Backend-server/ppocr/weights folder.
+
+
 ## Starting the server (in this directory)
 ```
 - uvicorn --host 0.0.0.0 main:app --reload
