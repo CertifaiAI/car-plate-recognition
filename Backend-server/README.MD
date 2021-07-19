@@ -6,7 +6,7 @@ This FastAPI server is used to process PPOCR in PC. You can send cropped car pla
 pip3 install -r requirements
 ```
 
-## Starting the server (in this directoty)
+## Starting the server (in this directory)
 ```
 - uvicorn --host 0.0.0.0 main:app --reload
 ```
