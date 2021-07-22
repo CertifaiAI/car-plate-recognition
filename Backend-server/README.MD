@@ -3,7 +3,7 @@ This FastAPI server is used to process PPOCR in PC. You can send cropped car pla
 
 ## Install other libraries
 ```
-pip3 install -r requirements
+pip3 install -r requirements.txt
 ```
 
 ## Weights for PPOCR
@@ -12,7 +12,7 @@ Please download the weights from [here](https://drive.google.com/drive/folders/1
 
 ## Starting the server (in this directory)
 ```
-- uvicorn --host 0.0.0.0 main:app --reload
+uvicorn --host 0.0.0.0 main:app --reload
 ```
 This command allow jetson nano to access the server via same network (wifi)
 

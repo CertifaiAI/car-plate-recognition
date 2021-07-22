@@ -24,7 +24,7 @@ ls -ltrh /dev/video*
 Due to the Github memory limit, the weights have been uploaded on to [Google Drive](https://drive.google.com/drive/folders/1afPFDv9Fo0GW4W5ss6GWgBGX31iUmn4t), please download the weights and place it inside of the 'weights/' folder on your Jetson Nano, then modify the --volume command in ```run.sh``` to point to that folder.
 
 ### Run the Server
-Before running the scripts make sure to first setup the FastAPI backend server, to do so please refer to the following instructions.
+Before running the scripts make sure to first setup the FastAPI backend server, to do so please refer to the following [instructions](https://github.com/CertifaiAI/car-plate-recognition/blob/main/Backend-server/README.MD).
 
 ### Inference
 Detect vehicles using CSI Camera connected to a Jetson Nano and send NumberPlate detections over to a FastAPI backend server to perform LPR.

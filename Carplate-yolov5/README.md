@@ -20,7 +20,7 @@ Due to the Github memory limit, the weights have been uploaded on to [Google Dri
 
 ### Run the Server
 
-Before running the scripts make sure to first setup the FastAPI backend server, to do so please refer to the following instructions.
+Before running the scripts make sure to first setup the FastAPI backend server, to do so please refer to the following [instructions](https://github.com/CertifaiAI/car-plate-recognition/blob/main/Backend-server/README.MD).
 
 ### Inference
 
