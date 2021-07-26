@@ -4,6 +4,7 @@ This is the official CarGate implementation which will be cloned by the Dockerfi
 It will be used to detect vehicles including Cars and Vans and send the NumberPlate detections over to a FastAPI backend server which will perform the License Plate Recognition (LPR) and allow the access to authorized vehicles.
 
 ## Steps to Run on a PC
+* Update: After the latest PR Allowing access to GPIO pins on the Jetson Nano for controlling an external Relay and Ultasonic Distance Sensor, the following steps can no longer be used to test on a PC.
 ### Requirements
 
 Python 3.8 or later with all [requirements.txt](https://github.com/CertifaiAI/car-plate-recognition/blob/main/Carplate-yolov5/requirements.txt) dependencies installed. To install run:
