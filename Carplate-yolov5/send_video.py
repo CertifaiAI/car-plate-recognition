@@ -12,12 +12,15 @@ from utils.general import check_img_size, check_requirements, check_imshow, non_
     scale_coords, strip_optimizer, set_logging, increment_path, save_one_box
 from utils.plots import colors, plot_one_box
 from utils.torch_utils import select_device, time_synchronized
+from utils.gate_control import GateControl
 
 import requests
 import base64
 import json
 from PIL import Image
 import io
+
+all_access = ['PFQ5217', 'PFQ 5217']
 
 
 @torch.no_grad()
@@ -47,6 +50,8 @@ def detect(weights='weights/combine123_scratch_416_batch8_ep150.pt',  # model.pt
     save_img = not nosave and not source.endswith('.txt')  # save inference images
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
         ('rtsp://', 'rtmp://', 'http://', 'https://'))
+
+    gate = GateControl()
 
     # Directories
     if save_results is True:
@@ -143,6 +148,9 @@ def detect(weights='weights/combine123_scratch_416_batch8_ep150.pt',  # model.pt
                                 data = {"image": carImage}
                                 response = requests.post('http://localhost:8000/plate', data=json.dumps(data))
                                 print(response.text)
+                                if json.loads(response.text)['Plate Number'] in all_access:
+                                    print("Vehicle is authorized")
+                                    gate.relay_on()
 
             # Print time (inference + NMS)
             print(f'{s}Done. ({t2 - t1:.3f}s)') # Example print out: "256x416 1 Car, 1 NumberPlate, Done. (0.016s)"
