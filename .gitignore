@@ -1,0 +1,7 @@
+dep/
+__pycache__/
+*.pyc
+
+Backend-server/images/
+Backend-server/processed/
+Backend-server/ppocr/weights/
