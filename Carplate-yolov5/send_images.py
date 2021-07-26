@@ -18,7 +18,7 @@ def cv2Img_base64Img(cv2Img):
 
 directory = 'data/images/*'
 
-all_access = ['"WND 1288"', '"WMJ 8663"']
+all_access = ['WND1288', 'WMJ8663']
 
 for carPlate in glob.glob(directory):
     carImage = cv2.imread(carPlate)
@@ -27,5 +27,5 @@ for carPlate in glob.glob(directory):
     data = {"image": carImage}
     response = requests.post('http://localhost:8000/plate', data=json.dumps(data))
     print(response.text)
-    if response.text in all_access:
-        print("Activated: Welcome " + response.text)
+    if json.loads(response.text)['Plate Number'] in all_access:
+        print("Activated! Welcome " + json.loads(response.text)['Plate Number'])
