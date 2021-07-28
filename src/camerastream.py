@@ -15,12 +15,14 @@ class CameraVideoStream:
                     'video/x-raw, width=(int){}, height=(int){}, '
                     'format=(string)BGRx ! '
                     'videoconvert ! appsink').format(width, height, width, height)
-        self.stream = cv2.VideoCapture(0)
+
         if nano:
             self.stream = cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
+        else:
+            self.stream = cv2.VideoCapture(0)
         (self.grabbed, self.frame) = self.stream.read()
         self.stopped = False
-        self.thread = None
+        self.q = None
 
     def start(self):
         self.thread = Thread(target=self.update, args=())
@@ -46,7 +48,7 @@ class CameraVideoStream:
         self.stream.release()
 
 if __name__ == "__main__":
-    camera = CameraVideoStream(nano=False)
+    camera = CameraVideoStream(nano=True)
     camera.start()
     while (True):
         Webrame = camera.read()
