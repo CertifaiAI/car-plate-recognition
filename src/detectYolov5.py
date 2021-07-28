@@ -29,8 +29,8 @@ class detectYolo:
         # from utils.general import check_img_size
         self.imgsz = check_img_size(inference_size, s=self.stride)  # check image size
 
-        if self.device.type != 'cpu':
-            self.model(torch.zeros(1, 3, self.imgsz, self.imgsz).to(self.device).type_as(next(self.model.parameters())))  # run once
+        #if self.device.type != 'cpu':
+            #self.model(torch.zeros(1, 3, self.imgsz, self.imgsz).to(self.device).type_as(next(self.model.parameters())))  # run once
     
     def preprocess(self, image):
         image = letterbox(image, self.imgsz, stride=self.stride)[0]
@@ -63,7 +63,8 @@ class detectYolo:
 
 
 def main():
-    detect = detectYolo(weight='yolov5/weights/detection.pt', device='cpu')
+    torch.cuda.is_available()
+    detect = detectYolo(weight='yolov5/weights/detection.pt', device='cuda')
     classname = detect.names
     # print(classname)
     image = cv2.imread('plate49.jpg')
