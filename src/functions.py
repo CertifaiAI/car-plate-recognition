@@ -3,14 +3,28 @@ from PIL import Image
 import io
 import base64
 
+# Process predictions results
+def extract_class(predictions):
+    allClass = []
+    for i, det in enumerate(predictions):
+        allClass.append(int(det[-1]))
+    return allClass
 
-# Check if car stopped using IOU
-
-# Check if car close enough
+# Check if car and plate close enough using predicted box
+def checkVehicleCloseEnough(predictions, threshold=200):
+    for det in predictions:
+        if int(det[-1]) != 2:
+            distance = det[2] - det[0]
+            print('Distance from camera: ' + str(distance))
+            if int(distance) > threshold:
+                return True
+            else:
+                return False
 
 # Check if (vehicles) and plate present
-def checkVehicleandPlatePresent(classname):
-    if 2 in classname and (0 in classname or 1 in classname):
+def checkVehicleandPlatePresent(predictions):
+    classes = extract_class(predictions)
+    if 2 in classes and (0 in classes or 1 in classes):
         return True
     return False
 
@@ -31,18 +45,12 @@ def crop_image(image, predictions, vehicle=False):
 def tensor2List(tensor):
     return tensor.tolist()
 
-# Process predictions results
-def extract_class(predictions):
-    allClass = []
-    for i, det in enumerate(predictions):
-        allClass.append(int(det[-1]))
-    return allClass
-
 # Draw bounding boxes
 def drawBoundingBox(img, predictions, classNames):
     for det in predictions:
         cv2.rectangle(img,(int(det[0]),int(det[1])),(int(det[2]),int(det[3])),(0,255,0),2)
         cv2.putText(img,'{} Detected, {:.2f}%'.format(classNames[int(det[-1])], (det[4])),(int(det[0]) ,int(det[1]) - 10),0,0.5,(0,0,255),2)
+    return img
 
 # cv2 image to base64 str
 def cv2Img_base64Img(cv2Img):

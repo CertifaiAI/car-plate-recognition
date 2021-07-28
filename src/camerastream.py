@@ -3,6 +3,8 @@
 '''
 from threading import Thread
 import cv2
+from torch._C import set_flush_denormal
+from functions import drawBoundingBox
 
 class CameraVideoStream:
     def __init__(self, width=640, height=480, src=0, nano=True):
@@ -21,8 +23,11 @@ class CameraVideoStream:
         else:
             self.stream = cv2.VideoCapture(0)
         (self.grabbed, self.frame) = self.stream.read()
+        self.result = None
+        self.predictions = None
         self.stopped = False
-        self.q = None
+        self.classes = None
+        self.thread = None
 
     def start(self):
         self.thread = Thread(target=self.update, args=())
@@ -35,10 +40,12 @@ class CameraVideoStream:
             if self.stopped:
                 return
             (self.grabbed, raw_frame) = self.stream.read()
+            if self.predictions is not None:
+                self.draw_box()
             if self.grabbed:
                 self.frame = cv2.resize(raw_frame, (600,500))
             else:
-                break
+                break   
 
     def read(self):
         return self.frame
@@ -47,8 +54,16 @@ class CameraVideoStream:
         self.stopped = True
         self.stream.release()
 
+    def draw_box(self):
+        image = drawBoundingBox(self.frame, self.predictions, self.classes)
+        self.result = image
+
+    def set_results(self, predictions, classes):
+        self.predictions = predictions
+        self.classes = classes
+
 if __name__ == "__main__":
-    camera = CameraVideoStream(nano=True)
+    camera = CameraVideoStream(nano=False)
     camera.start()
     while (True):
         Webrame = camera.read()

@@ -4,3 +4,4 @@ torch==1.8.0
 torchvision==0.9.0
 opencv-python
 pandas
+paho-mqtt

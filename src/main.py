@@ -9,7 +9,7 @@ import argparse
 import cv2
 # import json
 # import requests
-from functions import tensor2List, drawBoundingBox, checkVehicleandPlatePresent, crop_image, cv2Img_base64Img, show_fps, extract_class
+from functions import tensor2List, drawBoundingBox, checkVehicleandPlatePresent, crop_image, cv2Img_base64Img, show_fps, extract_class, checkVehicleCloseEnough
 from config import Config
 import time
 import torch
@@ -26,11 +26,9 @@ config = Config()
 torch.cuda.is_available()
 detector = detectYolo(weight=config.WEIGHTS_PATH, device=config.DEVICE)
 
-# Threads 
+# Threads
 # status = StatusReport(config=config)
-camera = CameraVideoStream(nano=args.nano)
-# start threads
-camera.start()
+camera = CameraVideoStream(nano=args.nano).start()
 
 def loop_and_detect(camera, detector, config, show):
     # used to record the time when we processed last frame
@@ -43,29 +41,29 @@ def loop_and_detect(camera, detector, config, show):
 
         # Detect object with incoming video stream
         predictions, classNames = detector.inference(input_frame)
-    
+
         # rescale prediction boxes
         predictions = detector.rescale_box(predictions, input_frame.shape)
 
         # convert tensor to lists
         predictions = tensor2List(predictions)
 
-        # process predictions
-        allClass = extract_class(predictions)
+        # Set predictions and classNames to camera class
+        camera.set_results(predictions, classNames)
 
-        # If vehicle and license plate detected. crop license plate
-        if checkVehicleandPlatePresent(allClass):
+        # Check vehicle and license plate detected and close enough
+        if checkVehicleandPlatePresent(predictions) and checkVehicleCloseEnough(predictions):
+
+            # Crop plate image
             plate_image = crop_image(image=input_frame, predictions=predictions)
 
             # Convert cv2 image to base64 str
             plate_image = cv2.cvtColor(plate_image, cv2.COLOR_BGR2RGB)
             plate_image_base64 = cv2Img_base64Img(plate_image)
-            print(plate_image_base64)
 
             # Send cropped plate to server -> returned with plate number 
             try:
                 data = {"image": plate_image_base64}
-                print(data)
                 # response = requests.post(config.SERVER_URL, data=json.dumps(data))
                 # result = response.text
             except:
@@ -79,26 +77,25 @@ def loop_and_detect(camera, detector, config, show):
             #     pass
         # show result
         if show:
-            # draw bounding box on frame
-            drawBoundingBox(input_frame, predictions, classNames)
-            
-            # FPS calculation
-            new_frame_time = time.time()
-            fps = 1/(new_frame_time-prev_frame_time)
-            prev_frame_time = new_frame_time
-            fps = str(int(fps))
-            img = show_fps(input_frame, fps)
+            if camera.result is not None:
+                result = camera.result
+                
+                # FPS calculation
+                new_frame_time = time.time()
+                fps = 1/(new_frame_time-prev_frame_time)
+                prev_frame_time = new_frame_time
+                fps = str(int(fps))
+                img = show_fps(result, fps)
 
-            cv2.imshow("Frame", input_frame)
+                cv2.imshow("Result", result)
 
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                # Exited 
-                camera.stop()
-                cv2.destroyAllWindows()
-                print("Cargate Exited!")
-                time.sleep(1)
-                break
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    # Exited 
+                    camera.stop()
+                    cv2.destroyAllWindows()
+                    print("Cargate Exited!")
+                    time.sleep(1)
+                    break
 
 if __name__ == '__main__':
     print("Running Cargate now...")
