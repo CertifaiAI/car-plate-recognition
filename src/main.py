@@ -12,6 +12,7 @@ import cv2
 from functions import tensor2List, drawBoundingBox, checkVehicleandPlatePresent, crop_image, cv2Img_base64Img, show_fps, extract_class
 from config import Config
 import time
+import torch
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--show', action='store_true', default=False, help='show results')    
@@ -21,6 +22,7 @@ args = parser.parse_args()
 # Classes
 config = Config()
 # sensor = Ultrasonic()
+torch.cuda.is_available()
 detector = detectYolo(weight=config.WEIGHTS_PATH, device=config.DEVICE)
 
 # Threads 
