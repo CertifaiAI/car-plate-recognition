@@ -5,7 +5,7 @@ from threading import Thread
 import cv2
 
 class CameraVideoStream:
-    def __init__(self, width=640, height=480, src=0):
+    def __init__(self, width=640, height=480, src=0, nano=True):
         
         gst_str = ('nvarguscamerasrc ! '
                     'video/x-raw(memory:NVMM), '
@@ -15,7 +15,9 @@ class CameraVideoStream:
                     'video/x-raw, width=(int){}, height=(int){}, '
                     'format=(string)BGRx ! '
                     'videoconvert ! appsink').format(width, height, width, height)
-        self.stream = cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
+        self.stream = cv2.VideoCapture(0)
+        if nano:
+            self.stream = cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
         (self.grabbed, self.frame) = self.stream.read()
         self.stopped = False
         self.thread = None
@@ -32,9 +34,7 @@ class CameraVideoStream:
                 return
             (self.grabbed, raw_frame) = self.stream.read()
             if self.grabbed:
-                raw_frame = cv2.flip(raw_frame, 1)
-                raw_frame = cv2.rotate(raw_frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-                self.frame = cv2.resize(raw_frame, (600,900))
+                self.frame = cv2.resize(raw_frame, (600,500))
             else:
                 break
 
@@ -45,3 +45,13 @@ class CameraVideoStream:
         self.stopped = True
         self.stream.release()
 
+if __name__ == "__main__":
+    camera = CameraVideoStream(nano=False)
+    camera.start()
+    while (True):
+        Webrame = camera.read()
+        cv2.imshow('Result', Webrame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+    camera.stop()
+    cv2.destroyAllWindows()
