@@ -16,7 +16,8 @@ import torch
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--show', action='store_true', default=False, help='show results')    
-parser.add_argument('--sensor', action='store_true', default=False, help='show results')    
+parser.add_argument('--sensor', action='store_true', default=False, help='use ultrasonic sensor')
+parser.add_argument('--nano', action='store_true', default=False, help='use nano')    
 args = parser.parse_args()
 
 # Classes
@@ -27,7 +28,7 @@ detector = detectYolo(weight=config.WEIGHTS_PATH, device=config.DEVICE)
 
 # Threads 
 # status = StatusReport(config=config)
-camera = CameraVideoStream(nano=False)
+camera = CameraVideoStream(nano=args.nano)
 # start threads
 camera.start()
 
