@@ -15,13 +15,16 @@ def checkVehicleandPlatePresent(classname):
     return False
 
 # Crop image
-def crop_image(image, data, car=False):
+def crop_image(image, predictions, vehicle=False):
     # crop plate
-    cropped_plate = image[data['NumberPlate']['y_min']: data['NumberPlate']['y_max'], data['NumberPlate']['x_min']: data['NumberPlate']['x_max']]
-    if car:
-        # crop car
-        cropped_car = image[data['Car']['y_min']: data['Car']['y_max'], data['Car']['x_min']: data['Car']['x_max']]
-        return cropped_plate, cropped_car
+    for det in predictions:
+        if int(det[-1]) == 2:
+            cropped_plate = image[int(det[1]): int(det[3]), int(det[0]): int(det[2])]
+        else:
+            if vehicle:
+                # crop car
+                cropped_car = image[int(det[1]): int(det[3]), int(det[0]): int(det[2])]
+                return cropped_plate, cropped_car
     return cropped_plate
 
 # Tensor to list
@@ -29,20 +32,11 @@ def tensor2List(tensor):
     return tensor.tolist()
 
 # Process predictions results
-def process_predictions(predictions, classNames):
-    data = {}
+def extract_class(predictions):
     allClass = []
     for i, det in enumerate(predictions):
-        name = classNames(int(det[-1]))
-        data[name] ={
-            'x_min': int(det[0]),
-            'y_min': int(det[1]),
-            'x_max': int(det[2]),
-            'y_max': int(det[3]),
-            'confidence': ("%.2f" % det[4])
-        }
         allClass.append(int(det[-1]))
-    return data, allClass
+    return allClass
 
 # Draw bounding boxes
 def drawBoundingBox(img, predictions, classNames):
@@ -58,3 +52,13 @@ def cv2Img_base64Img(cv2Img):
     buffer = io.BytesIO()
     image.save(buffer, format="JPEG")
     return base64.b64encode(buffer.getvalue()).decode('ascii')
+
+# FPS counter
+def show_fps(img, fps):
+    """ Draw fps number on top left corner of image """ 
+    font = cv2.FONT_HERSHEY_PLAIN
+    line = cv2.LINE_AA
+    fps_text = 'FPS: {}'.format(fps)
+    cv2.putText(img, fps_text, (11, 20), font, 1.0, (32, 32, 32), 4, line)
+    cv2.putText(img, fps_text, (10, 20), font, 1.0, (240, 240, 240), 1, line)
+    return img

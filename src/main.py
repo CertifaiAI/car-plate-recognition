@@ -9,7 +9,7 @@ import argparse
 import cv2
 # import json
 # import requests
-from functions import tensor2List, drawBoundingBox, checkVehicleandPlatePresent, crop_image, cv2Img_base64Img
+from functions import tensor2List, drawBoundingBox, checkVehicleandPlatePresent, crop_image, cv2Img_base64Img, show_fps, extract_class
 from config import Config
 import time
 
@@ -30,6 +30,10 @@ camera = CameraVideoStream(nano=False)
 camera.start()
 
 def loop_and_detect(camera, detector, config, show):
+    # used to record the time when we processed last frame
+    prev_frame_time = 0
+    # used to record the time at which we processed current frame
+    new_frame_time = 0
     while True:
         # get current frame
         input_frame = camera.read()
@@ -44,39 +48,48 @@ def loop_and_detect(camera, detector, config, show):
         predictions = tensor2List(predictions)
 
         # process predictions
-        # print(classNames[0])
-        # data, allClass = process_predictions(predictions, classNames)
+        allClass = extract_class(predictions)
 
-    # # If vehicle and license plate detected. crop license plate
-    # if checkVehicleandPlatePresent(allClass):
-    #     plate_image = crop_image(image=curFrame, data=data)
+        # If vehicle and license plate detected. crop license plate
+        if checkVehicleandPlatePresent(allClass):
+            plate_image = crop_image(image=input_frame, predictions=predictions)
 
-    #     # Convert cv2 image to base64 str
-    #     plate_image = cv2.cvtColor(plate_image, cv2.COLOR_BGR2RGB)
-    #     plate_image = cv2Img_base64Img(plate_image)
+            # Convert cv2 image to base64 str
+            plate_image = cv2.cvtColor(plate_image, cv2.COLOR_BGR2RGB)
+            plate_image_base64 = cv2Img_base64Img(plate_image)
+            print(plate_image_base64)
 
-    #     # Send cropped plate to server -> returned with plate number 
-    #     try:
-    #         data = {"image": plate_image}
-    #         response = requests.post(config.SERVER_URL, data=json.dumps(data))
-    #         result = response.text
-    #     except:
-    #         print("Failed to send plate to server")
-        
-    #     # Need authorized + plate number
-    #     if result is not None:
-    #         # Process result from server -> show on LED screen 
+            # Send cropped plate to server -> returned with plate number 
+            try:
+                data = {"image": plate_image_base64}
+                print(data)
+                # response = requests.post(config.SERVER_URL, data=json.dumps(data))
+                # result = response.text
+            except:
+                print("Failed to send plate to server")
+            
+            # # Need authorized + plate number
+            # if result is not None:
+            #     # Process result from server -> show on LED screen 
 
-    #         # Send data to LED panel
-    #         pass
-        
+            #     # Send data to LED panel
+            #     pass
         # show result
         if show:
             # draw bounding box on frame
             drawBoundingBox(input_frame, predictions, classNames)
-            cv2.imshow("Frame", input_frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            
+            # FPS calculation
+            new_frame_time = time.time()
+            fps = 1/(new_frame_time-prev_frame_time)
+            prev_frame_time = new_frame_time
+            fps = str(int(fps))
+            img = show_fps(input_frame, fps)
 
+            cv2.imshow("Frame", input_frame)
+
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
                 # Exited 
                 camera.stop()
                 cv2.destroyAllWindows()
