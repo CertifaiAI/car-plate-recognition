@@ -1,0 +1,17 @@
+# face
+fastapi[all]
+opencv-python
+
+# ocr
+numpy
+pandas
+shapely
+scikit-image
+imgaug==0.4.0
+pyclipper
+lmdb
+tqdm
+visualdl
+python-Levenshtein
+paddlepaddle
+gdown
