@@ -33,7 +33,7 @@ This show output result on Jetson Nano.
 ```bash
 $ python main.py --show --nano --sensor --led --relay
 ```  
-This show output result on Jetson Nano.
+This show output result on Jetson Nano with all sensor.
 
 
 *send_images.py*: Iterates through a number of pre-saved NumberPlate images, sends the images over to the FastAPI backend server and outputs the LPR. 
@@ -49,7 +49,7 @@ $ python send_video.py
 ```
 
 ### Run with GPU
-In order to run using GPU, please modify device on Carplate-yolov5/config.py
+In order to run using GPU, modify device on Carplate-yolov5/config.py
 ```
 self.DEVICE = 'cpu'
 ```
