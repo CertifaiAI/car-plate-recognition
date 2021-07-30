@@ -1,11 +1,12 @@
 # base ----------------------------------------
-torch==1.9.0
-torchvision==0.10.0
 requests
 opencv-python
 
 # plotting ------------------------------------
 pandas
+
+# sensors -------------------------------------
+Jetson.GPIO
 
 # Status report -------------------------------
 paho-mqtt
