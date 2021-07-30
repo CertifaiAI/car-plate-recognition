@@ -253,3 +253,9 @@ fabric.properties
 
 # Backend Server
 Backend-server/ppocr/weights/**
+kraftboard-fastapi/utils/ocr/ppocr/weights/*
+
+# weights
+*.pdiparams
+*.pdiparams.info
+*.pdmodel

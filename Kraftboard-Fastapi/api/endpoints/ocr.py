@@ -1,20 +1,16 @@
-from fastapi import FastAPI
-from functions import recoginzed_plate, base64Img_cv2Img
+from fastapi import APIRouter
+from models.ocr import plateImage
 import time
-from pydantic import BaseModel
+from utils.ocr.functions import recoginzed_plate, base64Img_cv2Img
 
-class plateImage(BaseModel):
-    image: str
+rounter = APIRouter()
 
-# FastAPI
-app = FastAPI()
+@rounter.get('/')
+def helloWorld():
+    return 'API for PaddlePaddle OCR'
 
-# PPOCR Here
-@app.get("/")
-def home():
-    return{"message": "Hello World"}
-
-@app.post("/plate")
+# Recive base64Img return plate number
+@rounter.post('/ocr')
 async def plateImage(inputs:plateImage):
     # Get execution time
     start_time = time.time()

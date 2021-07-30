@@ -3,7 +3,7 @@ import base64
 import numpy as np
 import cv2
 import base64
-from ppocr.predict_system import TextSystem
+from utils.ocr.ppocr.predict_system import TextSystem
 
 def base64Img_cv2Img(base64Img):
     # decode base64

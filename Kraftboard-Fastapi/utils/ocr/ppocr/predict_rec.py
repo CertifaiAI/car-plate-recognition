@@ -24,8 +24,6 @@ import cv2
 import numpy as np
 import math
 import time
-import traceback
-import paddle
 
 import utility
 from postprocess import build_post_process
@@ -37,7 +35,7 @@ class TextRecognizer(object):
         self.rec_batch_num = 6
         self.rec_algorithm = 'CRNN'
         cwd = os.getcwd()
-        self.rec_char_dict_path = cwd + '/ppocr/data/ppocr_keys_v1.txt'
+        self.rec_char_dict_path = cwd + '/utils/ocr/ppocr/data/ppocr_keys_v1.txt'
         self.use_space_char = True
         postprocess_params = {
             'name': 'CTCLabelDecode',
@@ -45,20 +43,6 @@ class TextRecognizer(object):
             "character_dict_path": self.rec_char_dict_path,
             "use_space_char": self.use_space_char
         }
-        # if self.rec_algorithm == "SRN":
-        #     postprocess_params = {
-        #         'name': 'SRNLabelDecode',
-        #         "character_type": self.character_type,
-        #         "character_dict_path": self.rec_char_dict_path,
-        #         "use_space_char": self.use_space_char
-        #     }
-        # elif self.rec_algorithm == "RARE":
-        #     postprocess_params = {
-        #         'name': 'AttnLabelDecode',
-        #         "character_type": self.character_type,
-        #         "character_dict_path": self.rec_char_dict_path,
-        #         "use_space_char": self.use_space_char
-        #     }
         self.postprocess_op = build_post_process(postprocess_params)
         self.predictor, self.input_tensor, self.output_tensors = \
             utility.create_predictor('rec')
