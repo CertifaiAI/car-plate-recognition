@@ -19,5 +19,5 @@ RUN git clone --recursive https://github.com/skvark/opencv-python.git
 RUN python3 -m pip install --upgrade pip
 RUN cd opencv-python && python3 -m pip wheel . --verbose && find . -name "opencv_python*.whl" | xargs python3 -m pip install
 RUN git clone https://github.com/CertifaiAI/car-plate-recognition.git
-RUN cd car-plate-recognition/Carplate-yolov5 && python3 -m pip install -r requirements.txt
+RUN cd car-plate-recognition/Carplate-yolov5 && python3 -m pip install -r requirements-nano.txt
 WORKDIR /car-plate-recognition/Carplate-yolov5
