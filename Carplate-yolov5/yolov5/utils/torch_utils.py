@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+import math
 import os
 import platform
 import subprocess
@@ -11,6 +12,7 @@ from pathlib import Path
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 try:
     import thop  # for FLOPs computation
@@ -111,17 +113,17 @@ def model_info(model, verbose=False, img_size=640): ##
             print('%5g %40s %9s %12g %20s %10.3g %10.3g' %
                   (i, name, p.requires_grad, p.numel(), list(p.shape), p.mean(), p.std()))
 
-    try:  # FLOPs
-        from thop import profile
-        stride = max(int(model.stride.max()), 32) if hasattr(model, 'stride') else 32
-        img = torch.zeros((1, model.yaml.get('ch', 3), stride, stride), device=next(model.parameters()).device)  # input
-        flops = profile(deepcopy(model), inputs=(img,), verbose=False)[0] / 1E9 * 2  # stride GFLOPs
-        img_size = img_size if isinstance(img_size, list) else [img_size, img_size]  # expand if int/float
-        fs = ', %.1f GFLOPs' % (flops * img_size[0] / stride * img_size[1] / stride)  # 640x640 GFLOPs
-    except (ImportError, Exception):
-        fs = ''
-
-    logger.info(f"Model Summary: {len(list(model.modules()))} layers, {n_p} parameters, {n_g} gradients{fs}")
+    # try:  # FLOPs
+    #     from thop import profile
+    #     stride = max(int(model.stride.max()), 32) if hasattr(model, 'stride') else 32
+    #     img = torch.zeros((1, model.yaml.get('ch', 3), stride, stride), device=next(model.parameters()).device)  # input
+    #     flops = profile(deepcopy(model), inputs=(img,), verbose=False)[0] / 1E9 * 2  # stride GFLOPs
+    #     img_size = img_size if isinstance(img_size, list) else [img_size, img_size]  # expand if int/float
+    #     fs = ', %.1f GFLOPs' % (flops * img_size[0] / stride * img_size[1] / stride)  # 640x640 GFLOPs
+    # except (ImportError, Exception):
+    #     fs = ''
+    #
+    # logger.info(f"Model Summary: {len(list(model.modules()))} layers, {n_p} parameters, {n_g} gradients{fs}")
 
 def scale_img(img, ratio=1.0, same_shape=False, gs=32):  # img(16,3,256,416) ##
     # scales img(bs,3,y,x) by ratio constrained to gs-multiple
