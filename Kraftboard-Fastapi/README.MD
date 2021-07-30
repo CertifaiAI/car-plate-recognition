@@ -16,10 +16,17 @@ There are two version of pytorch can be installed. Please select a version that 
 ```
 # CPU
 pip3 install torch==1.9.0+cpu torchvision==0.10.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+python -m pip install paddlepaddle -i https://mirror.baidu.com/pypi/simple
 
-# GPU
+# GPU (cuda 10.2)
 pip3 install torch==1.9.0+cu102 torchvision==0.10.0+cu102 -f https://download.pytorch.org/whl/torch_stable.html
+python -m pip install paddlepaddle-gpu -i https://mirror.baidu.com/pypi/simple
 ```
+Notes:
+1. Please modify the Settings.DEVICE variable to cuda (Using pytorch GPU) or cpu (Using pytorch cpu) under the file Core/config.py
+2. Please refer to Pytorch [installation guide page](https://pytorch.org/get-started/locally/) for other pytorch gpu cuda version
+3. Please refer to Paddle Paddle [installation guide page](https://www.paddlepaddle.org.cn/install/quick?docurl=/documentation/docs/zh/install/pip/linux-pip.html
+) for other PaddlePaddle gpu cuda version
 
 ## Installation on linux (tested on Ubuntu 20.04)
 ```
