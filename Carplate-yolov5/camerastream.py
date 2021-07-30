@@ -13,7 +13,7 @@ class CameraVideoStream:
                     'video/x-raw(memory:NVMM), '
                     'width=(int){}, height=(int){}, '
                     'format=(string)NV12, framerate=(fraction)30/1 ! '
-                    'nvvidconv flip-method=2 ! '
+                    'nvvidconv flip-method=0 ! '
                     'video/x-raw, width=(int){}, height=(int){}, '
                     'format=(string)BGRx ! '
                     'videoconvert ! appsink').format(width, height, width, height)
