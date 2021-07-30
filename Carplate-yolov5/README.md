@@ -11,7 +11,8 @@ Python 3.8 or later with all [requirements.txt](https://github.com/CertifaiAI/ca
 ```bash
 $ git clone https://github.com/CertifaiAI/car-plate-recognition.git
 $ cd Carplate-yolov5
-$ bash install_scripts.sh
+$ pip install -r requirements.txt
+$ gdown https://drive.google.com/uc?id=18tyNWkGC_x9FddZ9hJ5di3_Sc9WPkpd_ -O yolov5/weights/detection.pt
 ```
 
 ### Run the Server
