@@ -3,7 +3,6 @@
 '''
 from threading import Thread
 import cv2
-from torch._C import set_flush_denormal
 from functions import drawBoundingBox
 
 class CameraVideoStream:
