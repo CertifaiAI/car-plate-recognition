@@ -1,0 +1,15 @@
+# base ----------------------------------------
+requests
+opencv-python
+
+# plotting ------------------------------------
+pandas
+
+# sensors -------------------------------------
+Jetson.GPIO
+
+# Status report -------------------------------
+paho-mqtt
+
+# Install weights from drive
+gdown
