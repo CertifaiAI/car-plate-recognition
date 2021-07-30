@@ -7,9 +7,10 @@ from PIL import Image
 from torchvision import transforms
 import torch
 import pickle
+from core.config import Settings
 
-mtcnn = MTCNN(keep_all=True, thresholds=[0.7,0.8,0.8], min_face_size=100, device='cpu')
-mobile_facenet = MobileFaceNet(pretrained=True, training=False, device='cpu')
+mtcnn = MTCNN(keep_all=True, thresholds=[0.7,0.8,0.8], min_face_size=100, device=Settings.DEVICE)
+mobile_facenet = MobileFaceNet(pretrained=True, training=False, device=Settings.DEVICE)
 transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
