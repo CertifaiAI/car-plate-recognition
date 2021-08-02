@@ -24,8 +24,13 @@ parser.add_argument('--sensor', action='store_true', default=False, help='use ul
 parser.add_argument('--nano', action='store_true', default=False, help='use nano')
 parser.add_argument('--relay', action='store_true', default=False, help='use relay to control gate')
 parser.add_argument('--led', action='store_true', default=False, help='use led')
+parser.add_argument('--cudnn', action='store_true', default=False, help='use cudnn acceleration')
 
 args = parser.parse_args()
+
+if args.cudnn:
+    import torch.backends.cudnn as cudnn
+    cudnn.benchmark = True
 
 # Classes
 config = Config()
