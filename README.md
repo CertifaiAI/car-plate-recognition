@@ -8,6 +8,8 @@ It will be used to detect vehicles including Cars and Vans and send the NumberPl
 ## Steps to Run Cargate without docker
 ```
 # Install torch and torchvision
+# Enable execute permission
+chmod +x install_torch.sh 
 ./install_torch.sh
 
 # Install additional libraries
