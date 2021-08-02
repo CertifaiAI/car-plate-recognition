@@ -1,14 +1,5 @@
 #!/bin/bash
 
-# Install torch-cpu
-pip3 install torch==1.9.0+cpu torchvision==0.10.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
-
-# Install torch-gpu
-# pip3 install torch torchvision
-
-# Install third party libs
-pip3 install -r requirements.txt
-
 # Download weights
 # PPOCR
 gdown https://drive.google.com/uc?id=1JKrXpZz0jEKMnFtQOmGVCidnaHBOxXjm -O utils/ocr/ppocr/weights/ch_ppocr_mobile_v2.0_rec_infer/inference.pdmodel
