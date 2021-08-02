@@ -11,6 +11,8 @@
 - Input: Face Image
 - Output: Base64 Embeddings
 
+<br />
+
 ## Install Pytorch and PaddlePaddle
 There are two version of pytorch and PaddlePaddle can be installed. Please select a version that suitable to your machine
 ```
@@ -28,11 +30,15 @@ Notes:
 3. Please refer to Paddle Paddle [installation guide page](https://www.paddlepaddle.org.cn/install/quick?docurl=/documentation/docs/zh/install/pip/linux-pip.html
 ) for other PaddlePaddle gpu cuda version
 
+<br />
+
 ## Installation on linux (tested on Ubuntu 20.04)
 ```
 pip install -r requirements.txt
 ./install_req.sh 
 ```
+
+<br />
 
 ## Installation on Windows (tested on Windows 10)
 ```
@@ -40,17 +46,23 @@ pip install -r requirements.txt
 .\install_req.sh 
 ```
 
+<br />
+
 ## Getting Started
 ```
 python3 main.py
 ```
 This will start the server on localhost:8000 (Can modify port on core/config.py)
 
+<br />
+
 ## Docs
 ```
 http://localhost:8000/docs
 ```
 This will direct web page to fastapi built in docs
+
+<br />
 
 ## Testing API
 ```
