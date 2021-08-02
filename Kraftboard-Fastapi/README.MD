@@ -11,7 +11,7 @@
 - Input: Face Image
 - Output: Base64 Embeddings
 
-## Install Pytorch
+## Install Pytorch and PaddlePaddle
 There are two version of pytorch can be installed. Please select a version that suitable to your machine
 ```
 # CPU
