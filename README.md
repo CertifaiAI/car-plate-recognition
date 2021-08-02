@@ -3,6 +3,8 @@
 
 It will be used to detect vehicles including Cars and Vans and send the NumberPlate detections over to a FastAPI backend server which will perform the License Plate Recognition (LPR) and allow the access to authorized vehicles.
 
+<br />
+
 ## Steps to Run Cargate without docker
 ```
 # Install torch and torchvision
@@ -17,6 +19,8 @@ gdown https://drive.google.com/uc?id=18tyNWkGC_x9FddZ9hJ5di3_Sc9WPkpd_ -O Carpla
 # Run program
 python3 Carplate-yolov5/main.py --show --nano
 ```
+
+<br />
 
 ## Steps to Run Cargate program with Docker
 The Following scripts works on a Jetson Nano with **JetPack 4.5** image flashed. To download Jetpack 4.5, refer to the following [link](https://developer.nvidia.com/jetpack-sdk-45-archive).
@@ -36,19 +40,27 @@ Check to insure that the webcam is connected to /dev/video0
 ls -ltrh /dev/video*
 ```
 
-### Run the Server
+<br />
+
+## Run the Server
 Before running the scripts make sure to first setup the FastAPI backend server, to do so please refer to the following [instructions](https://github.com/CertifaiAI/car-plate-recognition/blob/main/Backend-server/README.MD).
 
-### Inference
+<br />
+
+## Inference
 Detect vehicles using CSI Camera connected to a Jetson Nano and send NumberPlate detections over to a FastAPI backend server to perform LPR.
 ```
 ./run.sh
 ```
 
-### **Demo**
+<br />
+
+## **Demo**
 ![car and license plate detection](./result.jpg)
 
-### **References**
+<br />
+
+## **References**
 #### 1. https://github.com/ultralytics/yolov5
 #### 2. https://github.com/PaddlePaddle/PaddleOCR 
 #### 3. https://github.com/otamajakusi/dockerfile-yolov5-jetson
