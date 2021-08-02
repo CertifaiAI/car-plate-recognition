@@ -6,5 +6,6 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api"
     PROJECT_NAME = 'FastAPI Server for Python Scripts'
     PORT = 8000
+    DEVICE = 'cpu'
 
 settings = Settings()

@@ -3,40 +3,48 @@ This is the official CarGate implementation which will be cloned by the Dockerfi
 
 It will be used to detect vehicles including Cars and Vans and send the NumberPlate detections over to a FastAPI backend server which will perform the License Plate Recognition (LPR) and allow the access to authorized vehicles.
 
-## Steps to Run on a PC
-* Update: After the latest PR Allowing access to GPIO pins on the Jetson Nano for controlling an external Relay and Ultasonic Distance Sensor, the following steps can no longer be used to test on a PC.
-### Requirements
+<br />
+
+## Requirements
 
 Python 3.8 or later with all [requirements.txt](https://github.com/CertifaiAI/car-plate-recognition/blob/main/Carplate-yolov5/requirements.txt) dependencies installed. To install run:
 
 ```bash
-$ git clone https://github.com/CertifaiAI/car-plate-recognition.git
-$ cd Carplate-yolov5
+# Download repo
+$ git clone https://github.com/CertifaiAI/car-plate-recognition.git && cd Carplate-yolov5 
+
+# Install Pytorch
+#There are two version of pytorch (CPU or GPU). Choose one that fits your system
+
+# CPU
+pip3 install torch==1.9.0+cpu torchvision==0.10.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+
+# GPU (cuda 10.2)
+pip3 install torch==1.9.0+cu102 torchvision==0.10.0+cu102 -f https://download.pytorch.org/whl/torch_stable.html
+
+# Install thrid party lib
 $ pip install -r requirements.txt
+
+# Download weights
 $ gdown https://drive.google.com/uc?id=18tyNWkGC_x9FddZ9hJ5di3_Sc9WPkpd_ -O yolov5/weights/detection.pt
 ```
+Notes:
+1. Please modify the Settings.DEVICE variable to cuda (Using GPU) or cpu (Using cpu) under the file Core/config.py
+2. Please refer to Pytorch [installation guide page](https://pytorch.org/get-started/locally/) for other pytorch gpu cuda version
 
-### Run the Server
+<br />
+
+## Run the Server
 
 Before running the scripts make sure to first setup the FastAPI backend server, to do so please refer to the following [instructions](https://github.com/CertifaiAI/car-plate-recognition/blob/main/Backend-server/README.MD).
 
-### Inference
-*main.py*: Runs the cargate program as a whole (includes sensors). User can select which sensors to use
+<br />
+
+## Inference
+*main.py*: Runs the cargate program without sensors.
 ```bash
 $ python main.py --show
 ```  
-This show output result on PC.
-
-```bash
-$ python main.py --show --nano
-```  
-This show output result on Jetson Nano.
-
-```bash
-$ python main.py --show --nano --sensor --led --relay
-```  
-This show output result on Jetson Nano with all sensor.
-
 
 *send_images.py*: Iterates through a number of pre-saved NumberPlate images, sends the images over to the FastAPI backend server and outputs the LPR. 
 
@@ -50,8 +58,3 @@ $ python send_images.py
 $ python send_video.py
 ```
 
-### Run with GPU
-In order to run using GPU, modify device on Carplate-yolov5/config.py
-```
-self.DEVICE = 'cpu'
-```
