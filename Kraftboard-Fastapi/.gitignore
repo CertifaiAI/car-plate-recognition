@@ -1,0 +1,6 @@
+# Weights
+*.pt
+*.pth
+
+# pycahce directory
+__pycache__/

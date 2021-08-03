@@ -20,3 +20,6 @@ pandas
 
 # extras --------------------------------------
 thop  # FLOPs computation
+
+# sensors -------------------------------------
+#Jetson.GPIO
