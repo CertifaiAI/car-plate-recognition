@@ -56,34 +56,6 @@ class TextDetector(object):
         postprocess_params["max_candidates"] = 1000
         postprocess_params["unclip_ratio"] = 1.6
         postprocess_params["use_dilation"] = False
-        # elif self.det_algorithm == "EAST":
-        #     postprocess_params['name'] = 'EASTPostProcess'
-        #     postprocess_params["score_thresh"] = 0.8
-        #     postprocess_params["cover_thresh"] = 0.1
-        #     postprocess_params["nms_thresh"] = 0.2
-        # elif self.det_algorithm == "SAST":
-        #     pre_process_list[0] = {
-        #         'DetResizeForTest': {
-        #             'resize_long': 960
-        #         }
-        #     }
-        #     postprocess_params['name'] = 'SASTPostProcess'
-        #     postprocess_params["score_thresh"] = 0.5
-        #     postprocess_params["nms_thresh"] = 0.2
-        #     self.det_sast_polygon = False
-        #     if self.det_sast_polygon:
-        #         postprocess_params["sample_pts_num"] = 6
-        #         postprocess_params["expand_scale"] = 1.2
-        #         postprocess_params["shrink_ratio_of_width"] = 0.2
-        #     else:
-        #         postprocess_params["sample_pts_num"] = 2
-        #         postprocess_params["expand_scale"] = 1.0
-        #         postprocess_params["shrink_ratio_of_width"] = 0.3
-        # else:
-        #     # logger.info("unknown det_algorithm:{}".format(self.det_algorithm))
-        #     print("unknown det_algorithm:{}".format(self.det_algorithm))
-        #     sys.exit(0)
-
         self.preprocess_op = create_operators(pre_process_list)
         self.postprocess_op = build_post_process(postprocess_params)
         self.predictor, self.input_tensor, self.output_tensors = utility.create_predictor('det')  # paddle.jit.load(args.det_model_dir)
@@ -162,18 +134,7 @@ class TextDetector(object):
             outputs.append(output)
 
         preds = {}
-        # if self.det_algorithm == "EAST":
-        #     preds['f_geo'] = outputs[0]
-        #     preds['f_score'] = outputs[1]
-        # elif self.det_algorithm == 'SAST':
-        #     preds['f_border'] = outputs[0]
-        #     preds['f_score'] = outputs[1]
-        #     preds['f_tco'] = outputs[2]
-        #     preds['f_tvo'] = outputs[3]
-        # elif self.det_algorithm == 'DB':
         preds['maps'] = outputs[0]
-        # else:
-        #     raise NotImplementedError
 
         post_result = self.postprocess_op(preds, shape_list)
         dt_boxes = post_result[0]['points']

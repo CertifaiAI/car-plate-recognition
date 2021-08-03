@@ -24,10 +24,9 @@ def create_predictor(mode):
     current_cwd = os.getcwd()
     # Get weights based on model type
     if mode == "det":
-        model_dir = current_cwd + '/ppocr/weights/ch_ppocr_mobile_v2.0_det_infer/'
+        model_dir = current_cwd + '/utils/ocr/ppocr/weights/ch_ppocr_mobile_v2.0_det_infer/'
     else:
-        model_dir = current_cwd + '/ppocr/weights/ch_ppocr_mobile_v2.0_rec_infer/'
-
+        model_dir = current_cwd + '/utils/ocr/ppocr/weights/ch_ppocr_mobile_v2.0_rec_infer/'
     if model_dir is None:
         print("not find {} model file path {}".format(mode, model_dir))
         sys.exit(0)
