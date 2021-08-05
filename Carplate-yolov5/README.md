@@ -13,15 +13,6 @@ Python 3.8 or later with all [requirements.txt](https://github.com/CertifaiAI/ca
 # Download repo
 $ git clone https://github.com/CertifaiAI/car-plate-recognition.git && cd Carplate-yolov5 
 
-# Install Pytorch
-#There are two version of pytorch (CPU or GPU). Choose one that fits your system
-
-# CPU
-pip3 install torch==1.9.0+cpu torchvision==0.10.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
-
-# GPU (cuda 10.2)
-pip3 install torch==1.9.0+cu102 torchvision==0.10.0+cu102 -f https://download.pytorch.org/whl/torch_stable.html
-
 # Install thrid party lib
 $ pip install -r requirements.txt
 

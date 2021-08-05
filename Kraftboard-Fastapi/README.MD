@@ -11,8 +11,8 @@
 - Input: Face Image
 - Output: Base64 Embeddings
 
-## Install Pytorch
-There are two version of pytorch that can be installed. Please select a version that suitable to your machine
+## Install Pytorch and PaddlePaddle
+There are two version of pytorch and paddlepaddle that can be installed. Please select a version that suitable to your machine
 
 ### Installation on linux (tested on Ubuntu 20.04)
 ```
@@ -28,7 +28,7 @@ python -m pip install paddlepaddle-gpu -i https://mirror.baidu.com/pypi/simple
 ### Installation on Windows (tested on Windows 10)
 ```
 # CPU
-pip3 install torch torchvision torchaudio
+pip3 install torch torchvision
 python -m pip install paddlepaddle -i https://mirror.baidu.com/pypi/simple
 
 # GPU (cuda 10.2)
