@@ -28,7 +28,7 @@ python -m pip install paddlepaddle-gpu -i https://mirror.baidu.com/pypi/simple
 ### Installation on Windows (tested on Windows 10)
 ```
 # CPU
-pip3 install torch torchvision torchaudio
+pip3 install torch torchvision
 python -m pip install paddlepaddle -i https://mirror.baidu.com/pypi/simple
 
 # GPU (cuda 10.2)
