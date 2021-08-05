@@ -9,6 +9,8 @@ import torch
 import pickle
 from core.config import Settings
 
+Settings = Settings()
+
 mtcnn = MTCNN(keep_all=True, thresholds=[0.7,0.8,0.8], min_face_size=100, device=Settings.DEVICE)
 mobile_facenet = MobileFaceNet(pretrained=True, training=False, device=Settings.DEVICE)
 transform = transforms.Compose([
