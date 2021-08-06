@@ -7,12 +7,13 @@ It will be used to detect vehicles including Cars and Vans and send the NumberPl
 * Update: After the latest PR Allowing access to GPIO pins on the Jetson Nano for controlling an external Relay and Ultasonic Distance Sensor, the following steps can no longer be used to test on a PC.
 ### Requirements
 
-Python 3.8 or later with all [requirements.txt](https://github.com/CertifaiAI/car-plate-recognition/blob/main/Carplate-yolov5/requirements.txt) dependencies installed. To install run:
+Python 3.8 or later with all [requirements.txt](https://github.com/CertifaiAI/car-plate-recognition/blob/main/Carplate-yolov5/requirements.txt) dependencies installed. To install and download weights run:
 
 ```bash
 $ git clone https://github.com/CertifaiAI/car-plate-recognition.git
 $ cd Carplate-yolov5
 $ pip install -r requirements.txt
+$ gdown https://drive.google.com/uc?id=18tyNWkGC_x9FddZ9hJ5di3_Sc9WPkpd_ -O weights/detection.pt
 ```
 
 ### Download Weights
