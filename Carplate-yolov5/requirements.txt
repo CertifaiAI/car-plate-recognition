@@ -23,3 +23,6 @@ thop  # FLOPs computation
 
 # sensors -------------------------------------
 #Jetson.GPIO
+
+# Download weights from drive -----------------
+gdown
