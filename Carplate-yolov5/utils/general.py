@@ -522,7 +522,7 @@ def wh_iou(wh1, wh2):
     return inter / (wh1.prod(2) + wh2.prod(2) - inter)  # iou = inter / (area1 + area2 - inter)
 
 
-def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, classes=None, agnostic=False, multi_label=False,
+def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, multi_label=False,
                         labels=(), max_det=300):
     """Runs Non-Maximum Suppression (NMS) on inference results
 
@@ -580,8 +580,8 @@ def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, classes=Non
             x = torch.cat((box, conf, j.float()), 1)[conf.view(-1) > conf_thres]
 
         # Filter by class
-        if classes is not None:
-            x = x[(x[:, 5:6] == torch.tensor(classes, device=x.device)).any(1)]
+        # if classes is not None:
+        #     x = x[(x[:, 5:6] == torch.tensor(classes, device=x.device)).any(1)]
 
         # Apply finite constraint
         # if not torch.isfinite(x).all():
@@ -595,7 +595,7 @@ def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, classes=Non
             x = x[x[:, 4].argsort(descending=True)[:max_nms]]  # sort by confidence
 
         # Batched NMS
-        c = x[:, 5:6] * (0 if agnostic else max_wh)  # classes
+        c = x[:, 5:6] * (max_wh)  # classes
         boxes, scores = x[:, :4] + c, x[:, 4]  # boxes (offset by class), scores
         i = torchvision.ops.nms(boxes, scores, iou_thres)  # NMS
         if i.shape[0] > max_det:  # limit detections
@@ -616,20 +616,20 @@ def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, classes=Non
     return output
 
 
-def strip_optimizer(f='best.pt', s=''):  # from utils.general import *; strip_optimizer()
-    # Strip optimizer from 'f' to finalize training, optionally save as 's'
-    x = torch.load(f, map_location=torch.device('cpu'))
-    if x.get('ema'):
-        x['model'] = x['ema']  # replace model with ema
-    for k in 'optimizer', 'training_results', 'wandb_id', 'ema', 'updates':  # keys
-        x[k] = None
-    x['epoch'] = -1
-    x['model'].half()  # to FP16
-    for p in x['model'].parameters():
-        p.requires_grad = False
-    torch.save(x, s or f)
-    mb = os.path.getsize(s or f) / 1E6  # filesize
-    print(f"Optimizer stripped from {f},{(' saved as %s,' % s) if s else ''} {mb:.1f}MB")
+# def strip_optimizer(f='best.pt', s=''):  # from utils.general import *; strip_optimizer()
+#     # Strip optimizer from 'f' to finalize training, optionally save as 's'
+#     x = torch.load(f, map_location=torch.device('cpu'))
+#     if x.get('ema'):
+#         x['model'] = x['ema']  # replace model with ema
+#     for k in 'optimizer', 'training_results', 'wandb_id', 'ema', 'updates':  # keys
+#         x[k] = None
+#     x['epoch'] = -1
+#     x['model'].half()  # to FP16
+#     for p in x['model'].parameters():
+#         p.requires_grad = False
+#     torch.save(x, s or f)
+#     mb = os.path.getsize(s or f) / 1E6  # filesize
+#     print(f"Optimizer stripped from {f},{(' saved as %s,' % s) if s else ''} {mb:.1f}MB")
 
 
 def print_mutation(hyp, results, yaml_file='hyp_evolved.yaml', bucket=''):
