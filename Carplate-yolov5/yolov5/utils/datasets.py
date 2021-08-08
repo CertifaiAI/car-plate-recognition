@@ -1,6 +1,8 @@
 # # Dataset utils and dataloaders
 import cv2
 import numpy as np
+from threading import Thread
+import time
 
 
 def letterbox(img, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True, stride=32):
@@ -34,4 +36,87 @@ def letterbox(img, new_shape=(640, 640), color=(114, 114, 114), auto=True, scale
     left, right = int(round(dw - 0.1)), int(round(dw + 0.1))
     img = cv2.copyMakeBorder(img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)  # add border
     return img, ratio, (dw, dh)
+
+
+class LoadStreams:  # multiple IP or RTSP cameras
+    def __init__(self, sources='0', img_size=640, stride=32, nano=True):
+        self.img_size = img_size
+        self.stride = stride
+
+        sources = [sources]
+
+        n = len(sources)
+        self.imgs, self.fps, self.frames, self.threads = [None] * n, [0] * n, [0] * n, [None] * n
+        self.sources = sources
+        for i, s in enumerate(sources):  # index, source
+            # Start thread to read frames from video stream
+            print(f'{i + 1}/{n}: {s}... ', end='')
+            s = eval(s) if s.isnumeric() else s  # i.e. s = '0' local webcam
+
+            if nano:
+                # Edited Lines for Enabling CSI Camera on Jetson Nano
+                def gstreamer_pipeline(
+                        capture_width=640,
+                        capture_height=384,
+                        display_width=640,
+                        display_height=384,
+                        framerate=60,
+                        flip_method=0,
+                ):
+                    return (
+                            "nvarguscamerasrc ! "
+                            "video/x-raw(memory:NVMM), "
+                            "width=(int)%d, height=(int)%d, "
+                            "format=(string)NV12, framerate=(fraction)%d/1 ! "
+                            "nvvidconv flip-method=%d ! "
+                            "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
+                            "videoconvert ! "
+                            "video/x-raw, format=(string)BGR ! appsink"
+                            % (
+                                capture_width,
+                                capture_height,
+                                framerate,
+                                flip_method,
+                                display_width,
+                                display_height,
+                            )
+                    )
+
+                cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
+                # Edited Lines for Enabling CSI Camera on Jetson Nano
+            else:
+                cap = cv2.VideoCapture(s)
+
+            assert cap.isOpened(), f'Failed to open {s}'
+            w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            self.fps[i] = max(cap.get(cv2.CAP_PROP_FPS) % 100, 0) or 30.0  # 30 FPS fallback
+            self.frames[i] = max(int(cap.get(cv2.CAP_PROP_FRAME_COUNT)), 0) or float('inf')  # infinite stream fallback
+
+            _, self.imgs[i] = cap.read()  # guarantee first frame
+            self.threads[i] = Thread(target=self.update, args=([i, cap]), daemon=True)
+            print(f" success ({self.frames[i]} frames {w}x{h} at {self.fps[i]:.2f} FPS)")
+            self.threads[i].start()
+        print('')  # newline
+
+        # check for common shapes
+        s = np.stack([letterbox(x, self.img_size, stride=self.stride)[0].shape for x in self.imgs], 0)  # shapes
+        self.rect = np.unique(s, axis=0).shape[0] == 1  # rect inference if all shapes equal
+        if not self.rect:
+            print('WARNING: Different stream shapes detected. For optimal performance supply similarly-shaped streams.')
+
+    def update(self, i, cap):
+        # Read stream `i` frames in daemon thread
+        n, f = 0, self.frames[i]
+        while cap.isOpened() and n < f:
+            n += 1
+            cap.grab()
+            if n % 4:  # read every 4th frame
+                success, im = cap.retrieve()
+                self.imgs[i] = im if success else self.imgs[i] * 0
+            time.sleep(1 / self.fps[i])  # wait time
+
+    def __iter__(self):
+        self.count = -1
+        return self
 
