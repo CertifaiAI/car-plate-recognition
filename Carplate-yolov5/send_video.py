@@ -6,12 +6,12 @@ import cv2
 import torch
 import torch.backends.cudnn as cudnn
 
-from models.experimental import attempt_load
-from utils.datasets import LoadStreams
-from utils.general import check_img_size, check_requirements, non_max_suppression, \
-    scale_coords, set_logging, save_one_box
-from utils.plots import colors, plot_one_box
-from utils.torch_utils import select_device, time_synchronized
+from yolov5.models.experimental import attempt_load
+from yolov5.utils.datasets import LoadStreams
+from yolov5.utils.general import check_img_size, non_max_suppression, scale_coords, save_one_box
+from yolov5.utils.plots import colors, plot_one_box
+from yolov5.utils.torch_utils import select_device, time_synchronized
+
 #from utils.gate_control import GateControl
 
 import requests
@@ -29,7 +29,6 @@ def detect(show, nano, imgsz=416, device=''):
     #gate = GateControl()
 
     # Initialize
-    set_logging()  # just for logging
     device = select_device(device)
 
     # Load model
@@ -58,7 +57,7 @@ def detect(show, nano, imgsz=416, device=''):
         pred = model(img)[0]
 
         # Apply NMS
-        pred = non_max_suppression(pred, conf_thres=0.6, iou_thres=0.45, max_det=1000)
+        pred = non_max_suppression(pred, conf_thres=0.8, iou_thres=0.45, max_det=1000)
         t2 = time_synchronized()
 
         # Process detections
@@ -126,5 +125,4 @@ if __name__ == '__main__':
     opt = parser.parse_args()
     print(opt)
 
-    check_requirements()
     detect(**vars(opt))
