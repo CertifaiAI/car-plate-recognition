@@ -9,7 +9,7 @@ class Config:
 
         # Model
         self.WEIGHTS_PATH = 'yolov5/weights/detection.pt'
-        self.DEVICE = 'cpu'
+        self.DEVICE = 'gpu'
 
         # Sensor
         self.SENSOR_DIST = 100
