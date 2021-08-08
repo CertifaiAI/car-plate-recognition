@@ -30,7 +30,7 @@ def detect(show, nano, imgsz=416, device=''):
     device = select_device(device)
 
     # Load model
-    model = attempt_load(weights='weights/detection.pt', map_location=device)  # load FP32 model
+    model = attempt_load(weights='yolov5/weights/detection.pt', map_location=device)  # load FP32 model
     stride = int(model.stride.max())  # model stride
     imgsz = check_img_size(imgsz, s=stride)  # check image size (if accidentally put 400 will round to nearest)
     names = model.module.names if hasattr(model, 'module') else model.names  # get class names
@@ -87,7 +87,7 @@ def detect(show, nano, imgsz=416, device=''):
 
                         if frame % 20 == 0 and names[c] == 'NumberPlate':
                             # Crop plate image
-                            plate_image = save_one_box(xyxy, imc, file=f'{p.stem}.jpg', BGR=True)
+                            plate_image = save_one_box(xyxy, imc, BGR=True)
 
                             # Convert cv2 image to base64 str
                             plate_image = cv2.cvtColor(plate_image, cv2.COLOR_BGR2RGB)
@@ -95,8 +95,8 @@ def detect(show, nano, imgsz=416, device=''):
 
                             try:
                                 data = {"image": plate_image_base64}
-                                response = requests.post('http://localhost:8000/api/ocr/ocr', data=json.dumps(data))
-                                print(response.text)
+                                # response = requests.post('http://localhost:8000/api/ocr/ocr', data=json.dumps(data))
+                                # print(response.text)
                                 # if json.loads(response.text)['Plate Number'] in all_access:
                                 #     print("Vehicle is authorized")
                                 #     gate.relay_on()
