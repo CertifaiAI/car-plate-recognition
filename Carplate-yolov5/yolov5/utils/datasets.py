@@ -42,6 +42,7 @@ class LoadStreams:  # multiple IP or RTSP cameras
     def __init__(self, sources='0', img_size=640, stride=32, nano=True):
         self.img_size = img_size
         self.stride = stride
+        self.nano = nano
 
         sources = [sources]
 
