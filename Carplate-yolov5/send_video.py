@@ -11,7 +11,7 @@ from yolov5.utils.datasets import LoadStreams
 from yolov5.utils.general import check_img_size, non_max_suppression, scale_coords, save_one_box
 from yolov5.utils.plots import colors, plot_one_box
 from yolov5.utils.torch_utils import select_device, time_synchronized
-from functions import cv2Img_base64Img
+from functions import cv2Img_base64Img, show_fps
 
 import requests
 import json
@@ -104,12 +104,17 @@ def detect(show, nano, imgsz=416, device=''):
                                 print("Failed to send plate to server")
 
             # Print time (inference + NMS)
-            print(f'{s}Done. ({t2 - t1:.3f}s)')  # Example print out: "256x416 1 Car, 1 NumberPlate, Done. (0.016s)"
+            # print(f'{s}Done. ({t2 - t1:.3f}s)')  # Example print out: "256x416 1 Car, 1 NumberPlate, Done. (0.016s)"
 
             # Stream results
             if show:
+                # FPS calculation
+                fps = 1/(t2-t1)
+                fps = "{:.2f}".format(fps)
+                show_fps(im0, fps)
+                
                 cv2.imshow(str(p), im0)
-                cv2.waitKey(1)  # 1 millisecond
+                cv2.waitKey(1)
 
     print(f'Done. ({time.time() - t0:.3f}s)')
 
