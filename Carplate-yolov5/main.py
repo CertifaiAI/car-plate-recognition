@@ -13,6 +13,7 @@ from functions import tensor2List, drawBoundingBox, checkVehicleandPlatePresent,
 from config import Config
 import time
 import torch
+import torch.backends.cudnn as cudnn
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--show', action='store_true', default=False, help='show results')    
@@ -22,6 +23,8 @@ parser.add_argument('--relay', action='store_true', default=False, help='use rel
 parser.add_argument('--led', action='store_true', default=False, help='use led')
 
 args = parser.parse_args()
+
+cudnn.benchmark = True
 
 # Classes
 config = Config()
