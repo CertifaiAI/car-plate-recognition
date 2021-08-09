@@ -1,6 +1,10 @@
 # Weights
 *.pt
 *.pth
+utils/ocr/ppocr/weights/**
 
 # pycahce directory
 __pycache__/
+
+# User-specific stuff:
+.idea/*

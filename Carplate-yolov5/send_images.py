@@ -25,7 +25,7 @@ for carPlate in glob.glob(directory):
     carImage = cv2.cvtColor(carImage, cv2.COLOR_BGR2RGB)
     carImage = cv2Img_base64Img(carImage)
     data = {"image": carImage}
-    response = requests.post('http://localhost:8000/plate', data=json.dumps(data))
+    response = requests.post('http://localhost:8000/api/ocr/ocr', data=json.dumps(data))
     print(response.text)
     if json.loads(response.text)['Plate Number'] in all_access:
         print("Activated! Welcome " + json.loads(response.text)['Plate Number'])

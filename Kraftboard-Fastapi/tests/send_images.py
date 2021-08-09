@@ -44,7 +44,7 @@ if __name__== "__main__":
     #     response = requests.post('http://localhost:8000/plate', data=json.dumps(data))
     #     print(response.text)
     
-    carImage = cv2.imread("face.jpg")
+    carImage = cv2.imread("plate.jpg")
 
     points = [[[164.71205139160156, 464.80303955078125], [399.141845703125, 460.17681884765625], [282.9638366699219, 618.928466796875], [174.51646423339844, 708.09716796875], [402.64697265625, 708.177490234375]]]
     boxes = [[26.444469451904297, 185.99990844726562, 545.4476928710938, 882.7085571289062]]
@@ -64,5 +64,5 @@ if __name__== "__main__":
 
 
     # Send image to server
-    response = requests.post('http://localhost:8000/api/face/mtcnnEmbeddings', data=json.dumps(data))
+    response = requests.post('http://localhost:8000/api/ocr/ocr', data=json.dumps(data))
     print(response.text)
