@@ -4,17 +4,17 @@
 It will be used to detect vehicles including Cars and Vans and send the NumberPlate detections over to a FastAPI backend server which will perform the License Plate Recognition (LPR) and allow the access to authorized vehicles.
 
 #### Run the Backend Server
-Before running the project, make sure to first setup the FastAPI backend server, to do so please refer to the following [instructions](Kraftboard-Fastapi/README.MD).
+Before running the project, make sure to first setup the FastAPI backend server, to do so please refer to the following [server instructions](Kraftboard-Fastapi/README.MD).
 
 #### This project can be run on both a PC 💻 as well as on a Jetson Nano 📼    
-- To Run the Cargate project on a PC, refer to the following [instructions](Carplate-yolov5/README.md).
+- To Run the Cargate project on a PC, please refer to the following [PC instructions](Carplate-yolov5/README.md).
 - To Run the Cargate project on a Jetson Nano, choose from the following two options:   
-  - [Run Cargate on Jetson Nano without Docker](#run-cargate-on-jetson-nano-without-docker)
-  - [Run Cargate on Jetson Nano with Docker](#run-cargate-on-jetson-nano-with-docker)
+  - [Run Cargate on Jetson Nano without Docker](#run-cargate-on-jetson-nano-without-docker-)
+  - [Run Cargate on Jetson Nano with Docker](#run-cargate-on-jetson-nano-with-docker-)
 
 <br />
 
-## Run Cargate on Jetson Nano without Docker
+## Run Cargate on Jetson Nano without Docker 🐳❌
 The Following scripts were tested on a Jetson Nano with **JetPack 4.5** image flashed. To download Jetpack 4.5, refer to the following [link](https://developer.nvidia.com/jetpack-sdk-45-archive).
 
 ### Install torch and torchvision libraries
@@ -40,7 +40,7 @@ python3 Carplate-yolov5/main.py --show --nano
 
 <br />
 
-## Run Cargate on Jetson Nano with Docker
+## Run Cargate on Jetson Nano with Docker 🐳
 The Following scripts were tested on a Jetson Nano with **JetPack 4.5** image flashed. To download Jetpack 4.5, refer to the following [link](https://developer.nvidia.com/jetpack-sdk-45-archive).
 
 ### Change Docker Default Runtime
