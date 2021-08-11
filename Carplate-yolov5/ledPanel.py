@@ -12,6 +12,7 @@ class LedPanel():
 
     def send_data(self, data):
         # Send to LED
-        self.ser.write(data.encode())
+        output = 'Welcome ' + data
+        self.ser.write(output.encode())
         # Write back to ori
         self.ser.write(self.welcome_message.encode())

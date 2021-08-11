@@ -11,6 +11,8 @@ import cv2
 # import requests
 from functions import tensor2List, drawBoundingBox, checkVehicleandPlatePresent, crop_image, cv2Img_base64Img, show_fps, extract_class, checkVehicleCloseEnough
 from config import Config
+from ledPanel import LedPanel
+from utils.gate_control import GateControl
 import time
 import torch
 
@@ -25,8 +27,9 @@ args = parser.parse_args()
 
 # Classes
 config = Config()
-# door = doorControl()
+gate = GateControl()
 # sensor = Ultrasonic()
+ledPanel = LedPanel()
 torch.cuda.is_available()
 detector = detectYolo(weight=config.WEIGHTS_PATH, device=config.DEVICE)
 
@@ -34,7 +37,7 @@ detector = detectYolo(weight=config.WEIGHTS_PATH, device=config.DEVICE)
 # status = StatusReport(config=config, camera=camera, door=door)
 camera = CameraVideoStream(nano=args.nano).start()
 
-def loop_and_detect(camera, detector, config, show):
+def loop_and_detect(camera, detector, config, show, led, relay):
     # used to record the time when we processed last frame
     prev_frame_time = 0
     # used to record the time at which we processed current frame
@@ -73,12 +76,14 @@ def loop_and_detect(camera, detector, config, show):
             except:
                 print("Failed to send plate to server")
             
+            # TODO: add authentication result
             # # Need authorized + plate number
-            # if result is not None:
+            # if result is not None and led:
             #     # Process result from server -> show on LED screen 
-
-            #     # Send data to LED panel
-            #     pass
+            #     ledPanel.send_data(result)
+            #     if relay:
+            #         gate.relay_on()
+                
         # show result
         if show:
             if camera.result is not None:
@@ -104,7 +109,7 @@ def loop_and_detect(camera, detector, config, show):
 if __name__ == '__main__':
     print("Running Cargate now...")
     try:
-        loop_and_detect(detector=detector, camera=camera, config=config, show=args.show)
+        loop_and_detect(detector=detector, camera=camera, config=config, show=args.show, led=args.led, relay=args.relay)
     except (KeyboardInterrupt, SystemExit):
         print('Received keyboard interrupt, quitting threads.\n')
         camera.stop()
