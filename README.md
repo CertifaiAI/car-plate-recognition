@@ -75,6 +75,8 @@ There are 2 external sensors used in this project:
 
 ![CarGate Circuit Diagram](https://user-images.githubusercontent.com/68045710/127173320-dfba41cb-7f76-4e7c-98df-4b95899fe72c.PNG)
 
+<br />
+
 ## Appendix
 
 There are 2 ways that you can use to run shell scripts on Linux:
