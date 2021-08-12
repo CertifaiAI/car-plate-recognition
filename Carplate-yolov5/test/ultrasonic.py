@@ -18,10 +18,11 @@ while True:
     GPIO.output(TRIG, True)
     time.sleep(0.0001)
     GPIO.output(TRIG, False)
-
+    #print(GPIO.input(ECHO))
     while GPIO.input(ECHO) == 0:
         pulse_start = time.time()
-    
+        #print(pulse_start)
+    print(GPIO.input(ECHO))
     while GPIO.input(ECHO) == 1:
         pulse_end = time.time()
     
