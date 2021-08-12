@@ -10,9 +10,6 @@ import json
 import requests
 from utils.functions import tensor2List, checkVehicleandPlatePresent, crop_image, cv2Img_base64Img, show_fps, checkVehicleCloseEnough
 from utils.config import Config
-from utils.ledPanel import LedPanel
-from utils.gate_control import GateControl
-from utils.ultrasonicSensor import Ultrasonic
 import time
 import torch
 
@@ -22,23 +19,31 @@ parser.add_argument('--sensor', action='store_true', default=False, help='use ul
 parser.add_argument('--nano', action='store_true', default=False, help='use nano')
 parser.add_argument('--relay', action='store_true', default=False, help='use relay to control gate')
 parser.add_argument('--led', action='store_true', default=False, help='use led')
+parser.add_argument('--server', action='store_true', default=False, help='use backend server for ppocr inference')
 
 args = parser.parse_args()
 
 # Classes
 config = Config()
-gate = GateControl()
-sensor = Ultrasonic()
-ledPanel = LedPanel()
+
+# Threads
+camera = CameraVideoStream(nano=args.nano).start()
+
+if args.nano:        
+    from utils.ledPanel import LedPanel
+    from utils.gate_control import GateControl
+    from utils.ultrasonicSensor import Ultrasonic
+    gate = GateControl()
+    sensor = Ultrasonic()
+    ledPanel = LedPanel()
+    status = StatusReport(config=config, camera=camera, door=gate)
 
 torch.cuda.is_available()
 detector = detectYolo(weight=config.WEIGHTS_PATH, device=config.DEVICE)
 
-# Threads
-camera = CameraVideoStream(nano=args.nano).start()
-status = StatusReport(config=config, camera=camera, door=gate)
 
-def loop_and_detect(camera, detector, config, show, led, relay):
+
+def loop_and_detect(camera, detector, config):
     # used to record the time when we processed last frame
     prev_frame_time = 0
     # used to record the time at which we processed current frame
@@ -69,26 +74,26 @@ def loop_and_detect(camera, detector, config, show, led, relay):
             plate_image = cv2.cvtColor(plate_image, cv2.COLOR_BGR2RGB)
             plate_image_base64 = cv2Img_base64Img(plate_image)
 
-            # Send cropped plate to server -> returned with plate number 
-            try:
-                data = {"image": plate_image_base64}
-                response = requests.post(config.SERVER_URL, data=json.dumps(data))
-                result = response.text
-                # TODO find out how result is returned, extract authentication, plate number
-            except:
-                print("Failed to send plate to server")
-            
-            # TODO: add authentication result
-            # Need authorized + plate number
-            if result is not None and led:
-                # Process result from server -> show on LED screen 
-                # TODO replace result with plate data
-                ledPanel.send_data(result)
-                if relay:
-                    gate.relay_on()
+            # Send cropped plate to server -> returned with plate number
+            if args.server:
+                try:
+                    data = {"image": plate_image_base64}
+                    response = requests.post(config.SERVER_URL, data=json.dumps(data))
+                    result = response.text
+                    # TODO find out how result is returned, extract authentication, plate number
+                except:
+                    print("Failed to send plate to server")
                 
+                # TODO: add authentication result
+                # Need authorized + plate number
+                if result is not None and args.led:
+                    # Process result from server -> show on LED screen 
+                    # TODO replace result with plate data
+                    ledPanel.send_data(result)
+                    if args.relay:
+                        gate.relay_on()
         # show result
-        if show:
+        if args.show:
             if camera.result is not None:
                 result = camera.result
 
@@ -112,7 +117,12 @@ def loop_and_detect(camera, detector, config, show, led, relay):
 if __name__ == '__main__':
     print("Running Cargate now...")
     try:
-        loop_and_detect(detector=detector, camera=camera, config=config, show=args.show, led=args.led, relay=args.relay)
+        # Ultrasonic sensor here
+        if args.sensor and args.nano:
+            if sensor.get_distance() < 200: # less 200 cm has object
+                loop_and_detect(detector=detector, camera=camera, config=config)
+        else:
+            loop_and_detect(detector=detector, camera=camera, config=config)
     except (KeyboardInterrupt, SystemExit):
         print('Received keyboard interrupt, quitting threads.\n')
         camera.stop()
