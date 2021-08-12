@@ -3,7 +3,7 @@
 '''
 from threading import Thread
 import cv2
-from functions import drawBoundingBox
+from utils.functions import drawBoundingBox
 
 class CameraVideoStream:
     def __init__(self, width=640, height=480, src=0, nano=True):

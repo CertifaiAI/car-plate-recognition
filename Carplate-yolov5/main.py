@@ -1,18 +1,18 @@
 '''
     Cargate program Implementation on Jetson Nano
 '''
-# from ultrasonicSensor import Ultrasonic
-from camerastream import CameraVideoStream
-from detectYolov5 import detectYolo
-# from statusReport import StatusReport
+from utils.camerastream import CameraVideoStream
+from utils.detectYolov5 import detectYolo
+from utils.statusReport import StatusReport
 import argparse
 import cv2
-# import json
-# import requests
-from functions import tensor2List, drawBoundingBox, checkVehicleandPlatePresent, crop_image, cv2Img_base64Img, show_fps, extract_class, checkVehicleCloseEnough
-from config import Config
-from ledPanel import LedPanel
+import json
+import requests
+from utils.functions import tensor2List, checkVehicleandPlatePresent, crop_image, cv2Img_base64Img, show_fps, checkVehicleCloseEnough
+from utils.config import Config
+from utils.ledPanel import LedPanel
 from utils.gate_control import GateControl
+from utils.ultrasonicSensor import Ultrasonic
 import time
 import torch
 
@@ -28,14 +28,15 @@ args = parser.parse_args()
 # Classes
 config = Config()
 gate = GateControl()
-# sensor = Ultrasonic()
+sensor = Ultrasonic()
 ledPanel = LedPanel()
+
 torch.cuda.is_available()
 detector = detectYolo(weight=config.WEIGHTS_PATH, device=config.DEVICE)
 
 # Threads
-# status = StatusReport(config=config, camera=camera, door=door)
 camera = CameraVideoStream(nano=args.nano).start()
+status = StatusReport(config=config, camera=camera, door=gate)
 
 def loop_and_detect(camera, detector, config, show, led, relay):
     # used to record the time when we processed last frame
@@ -71,18 +72,20 @@ def loop_and_detect(camera, detector, config, show, led, relay):
             # Send cropped plate to server -> returned with plate number 
             try:
                 data = {"image": plate_image_base64}
-                # response = requests.post(config.SERVER_URL, data=json.dumps(data))
-                # result = response.text
+                response = requests.post(config.SERVER_URL, data=json.dumps(data))
+                result = response.text
+                # TODO find out how result is returned, extract authentication, plate number
             except:
                 print("Failed to send plate to server")
             
             # TODO: add authentication result
-            # # Need authorized + plate number
-            # if result is not None and led:
-            #     # Process result from server -> show on LED screen 
-            #     ledPanel.send_data(result)
-            #     if relay:
-            #         gate.relay_on()
+            # Need authorized + plate number
+            if result is not None and led:
+                # Process result from server -> show on LED screen 
+                # TODO replace result with plate data
+                ledPanel.send_data(result)
+                if relay:
+                    gate.relay_on()
                 
         # show result
         if show:

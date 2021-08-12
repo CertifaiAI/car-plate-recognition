@@ -5,7 +5,7 @@ from yolov5.models.experimental import attempt_load
 from yolov5.utils.general import check_img_size, non_max_suppression, scale_coords
 from yolov5.utils.datasets import letterbox
 import numpy as np
-from functions import drawBoundingBox, crop_image
+from utils.functions import drawBoundingBox, crop_image
 
 class detectYolo:
     def __init__(self, weight, device, inference_size=416):

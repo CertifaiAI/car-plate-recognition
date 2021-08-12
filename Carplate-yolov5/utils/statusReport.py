@@ -2,7 +2,7 @@
     Send status to kraftboard server -> Device status, Gate status, Entrance view
     Protocol => mqtt / http
 '''
-from functions import cv2Img_base64Img
+from utils.functions import cv2Img_base64Img
 from threading import Thread
 import paho.mqtt.client as mqtt
 import json
