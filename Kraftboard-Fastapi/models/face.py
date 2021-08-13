@@ -10,3 +10,7 @@ class faceImageEmbeddings(BaseModel):
     image: str
     boxes: str
     points: str
+
+class comparisons(BaseModel):
+    embeddings: List
+    embedding_to_compare: str
