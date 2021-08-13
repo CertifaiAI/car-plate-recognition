@@ -1,6 +1,5 @@
 from fastapi import APIRouter
-from torch.nn.functional import poisson_nll_loss
-from models.face import faceImage, faceImageEmbeddings
+from models.face import faceImage, faceImageEmbeddings, comparisons
 from utils.face.functions import detectWithMTCNN, face2embeddings, face_aligner, base64Img_cv2Img, array_to_base64, base64_to_array, compare_faces
 import time
 
