@@ -136,3 +136,18 @@ def base64_to_array(base64_string):
 
 def list2array(list):
     return (np.array(list))
+
+# compare embeddings
+def compare_faces(lists, target, names):
+    diff = lists - target
+    dist = np.sum(np.power(diff, 2), axis=1)
+    min_dist = np.min(dist)
+    min_idx = np.argmin(dist)
+    user = names[int(min_idx)]
+    face_threshold = 1.0
+    matched = False
+    if min_dist < face_threshold:
+        matched = True
+    if not matched:
+        user = None
+    return matched, user, min_dist
