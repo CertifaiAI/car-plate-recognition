@@ -69,11 +69,16 @@ Detect vehicles using the CSI Camera and send NumberPlate detections over to a F
 <br />
 
 ## External Hardware Circuit Diagram
-There are 2 external sensors used in this project:
-1) **HC-SR04 Ultrasonic Distance Sensor**: Used to determine if a vehicle is present before starting the detection. [(link)](https://my.cytron.io/p-3v-5.5v-ultrasonic-ranging-module?r=1&gclid=Cj0KCQjw3f6HBhDHARIsAD_i3D-F-Jbar0A6EUIiDZ_Uve30oZ26GYebag4zr8nsH9GjRjN0Baa66QMaAm-wEALw_wcB)          
-2) **1 CH Active H/L 5V Relay Module**: Used to control the gate and grant access to authorized vehicles. [(link)](https://my.cytron.io/p-1ch-active-h-l-5v-optocoupler-relay-module?search=single%20channel&description=1)       
 
-![CarGate Circuit Diagram](https://user-images.githubusercontent.com/68045710/127173320-dfba41cb-7f76-4e7c-98df-4b95899fe72c.PNG)
+There are few exxternal hardware used in this project:
+1) **4GB Nvidia Jetson Nano Developer Kit (B01)**: Edge Device used for running inference of the Cargate Project. [(link)](https://my.cytron.io/p-jetson-nano-basic-kit-64gb-microsd-and-power-adapter?r=1&gclid=CjwKCAjw9uKIBhA8EiwAYPUS3BZKu662BgpNuxkQ-N37AZnbsdjGnrkmls9kMq9PYegSqjzvAXJ03hoCNrQQAvD_BwE)   
+2) **IMX219-77 CSI Camera**: Used for obtaining input image frames to be fed into the Neural Network. [(link)](https://www.waveshare.com/product/ai/cameras/single-cameras/imx219-77-camera.htm)  
+3) **1 CH Active H/L 5V Relay Module**: Used to control the gate and grant access to authorized vehicles. [(link)](https://my.cytron.io/p-1ch-active-h-l-5v-optocoupler-relay-module?search=single%20channel&description=1)  
+4) **JSN-SR04T Waterproof Ultrasonic Module**: Used to determine if vehicle is present before starting detection. [(link)](https://my.cytron.io/p-waterproof-ultrasonic-module?r=1&gclid=CjwKCAjw9uKIBhA8EiwAYPUS3LeC40Laj_BcDWOXrLwl_AcSGEV3mtbL0mmIaJUx3kVsCiK8A4RYABoC9g4QAvD_BwE)            
+5) **CH340 Arduino Uno**: Used to obtain ultrasonic sensor reading and send it to the Jetson Nano via I2C. [(link)](https://my.cytron.io/p-uno-compatible-ch340-with-usb-cable?r=1&gclid=CjwKCAjw9uKIBhA8EiwAYPUS3EGIYHRe9-xZTnu5T9eceew3vJHvf_FrQNoBL1TUkrDhJwTzinCXYhoCtxsQAvD_BwE)   
+6) **LED Panel**: Used to display the Number Plate of authorized vehicles on an LED Panel. [(link)]()
+
+![Cargate1](https://user-images.githubusercontent.com/68045710/129501124-3ac15b98-35f9-42fc-b596-9d1a4cfe9551.png)
 
 <br />
 
