@@ -76,7 +76,7 @@ There are few exxternal hardware used in this project:
 3) **1 CH Active H/L 5V Relay Module**: Used to control the gate and grant access to authorized vehicles. [(link)](https://my.cytron.io/p-1ch-active-h-l-5v-optocoupler-relay-module?search=single%20channel&description=1)  
 4) **JSN-SR04T Waterproof Ultrasonic Module**: Used to determine if vehicle is present before starting detection. [(link)](https://my.cytron.io/p-waterproof-ultrasonic-module?r=1&gclid=CjwKCAjw9uKIBhA8EiwAYPUS3LeC40Laj_BcDWOXrLwl_AcSGEV3mtbL0mmIaJUx3kVsCiK8A4RYABoC9g4QAvD_BwE)            
 5) **CH340 Arduino Uno**: Used to obtain ultrasonic sensor reading and send it to the Jetson Nano via I2C. [(link)](https://my.cytron.io/p-uno-compatible-ch340-with-usb-cable?r=1&gclid=CjwKCAjw9uKIBhA8EiwAYPUS3EGIYHRe9-xZTnu5T9eceew3vJHvf_FrQNoBL1TUkrDhJwTzinCXYhoCtxsQAvD_BwE)   
-6) **LED Panel**: Used to display the Number Plate of authorized vehicles on an LED Panel. [(link)]()
+6) **P10 LED Display**: Used to display the Number Plate of authorized vehicles on an LED Panel. [(link)]()
 
 ![Cargate1](https://user-images.githubusercontent.com/68045710/129501124-3ac15b98-35f9-42fc-b596-9d1a4cfe9551.png)
 
