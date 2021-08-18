@@ -5,7 +5,7 @@
 class Config: 
     def __init__(self):
         # Server
-        self.SERVER_URL = ''
+        self.SERVER_URL = 'http://139.162.33.89:8080/api/v1/r69C44coGlPTANdNBnqf/rpc'
 
         # Model
         self.WEIGHTS_PATH = 'yolov5/weights/detection.pt'
@@ -15,7 +15,7 @@ class Config:
         self.SENSOR_DIST = 100
 
         # Status report 
-        self.STATUS_URL = ''
+        # self.STATUS_URL = ''
         
         # TOKEN
         self.STATUS_TOKEN = ''

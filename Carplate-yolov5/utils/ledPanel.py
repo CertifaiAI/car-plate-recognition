@@ -20,11 +20,9 @@ class LedPanel():
         #     print("Cannot connect to arduino")
 
     def send_data(self, data):
-        # Send to LED
-        output = 'Welcome ' + data
         # Allow connection establish
         time.sleep(2)
-        self.ser.write(output.encode())
+        self.ser.write(data.encode())
         # Write back to ori
         time.sleep(2)
         self.ser.write(self.welcome_message.encode())
