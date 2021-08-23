@@ -19,6 +19,7 @@ parser.add_argument('--nano', action='store_true', default=False, help='use nano
 parser.add_argument('--relay', action='store_true', default=False, help='use relay to control gate')
 parser.add_argument('--led', action='store_true', default=False, help='use led')
 parser.add_argument('--server', action='store_true', default=False, help='use backend server for ppocr inference')
+parser.add_argument('--pc', action='store_true', default=False, help='for pc inference')
 
 args = parser.parse_args()
 
@@ -47,79 +48,83 @@ def loop_and_detect(camera, detector, config):
     # used to record the time at which we processed current frame
     new_frame_time = 0
     while True:
-        # get current frame
-        input_frame = camera.read()
+        # Get sensor distance determine to run or not
+        if (args.sensor and sensor.get_distance() < 200) or args.pc:
+            # get current frame
+            input_frame = camera.read()
 
-        # Detect object with incoming video stream
-        predictions, classNames = detector.inference(input_frame)
+            # Detect object with incoming video stream
+            predictions, classNames = detector.inference(input_frame)
 
-        # rescale prediction boxes
-        predictions = detector.rescale_box(predictions, input_frame.shape)
+            # rescale prediction boxes
+            predictions = detector.rescale_box(predictions, input_frame.shape)
 
-        # convert tensor to lists
-        predictions = tensor2List(predictions)
+            # convert tensor to lists
+            predictions = tensor2List(predictions)
 
-        # Set predictions and classNames to camera class
-        camera.set_results(predictions, classNames)
+            # Set predictions and classNames to camera class
+            camera.set_results(predictions, classNames)
 
-        # Check vehicle and license plate detected and close enough
-        if checkVehicleandPlatePresent(predictions) and checkVehicleCloseEnough(predictions):
+            # Check vehicle and license plate detected and close enough
+            if checkVehicleandPlatePresent(predictions) and checkVehicleCloseEnough(predictions):
 
-            # Crop plate image
-            plate_image = crop_image(image=input_frame, predictions=predictions)
+                # Crop plate image
+                plate_image = crop_image(image=input_frame, predictions=predictions)
 
-            # Convert cv2 image to base64 str
-            plate_image = cv2.cvtColor(plate_image, cv2.COLOR_BGR2RGB)
-            plate_image_base64 = cv2Img_base64Img(plate_image)
+                # Convert cv2 image to base64 str
+                plate_image = cv2.cvtColor(plate_image, cv2.COLOR_BGR2RGB)
+                plate_image_base64 = cv2Img_base64Img(plate_image)
 
-            # Send cropped plate to server -> returned with plate number
-            if args.server:
-                try:
-                    data = {"method":"compare_number_plates", "params": { "image":{ "@ImageFormat": "PNG", "@ImageData" :plate_image_base64}}}
-                    start_time = time.time()
-                    response = requests.post(config.SERVER_URL, json=data)
-                    result = response.json()
-                    print("Server inference time is {}".format(time.time() - start_time))
-                    print("Plate number: {}, Confidence: {}".format(result['plate_number_compared'], result['confidence']))
-                    print(result)
-                except:
-                    print("Failed to send plate to server")
-                
-                # Need authorized + plate number
-                if result["matched"] == True and args.led:
-                    # data if authenticated
-                    data = "Welcome " + result["plate_number_compared"]
-                    # Process result from server -> show on LED screen
-                    ledPanel.send_data(data)
-                elif result["matched"] == False and args.led:
-                    # data if not authenticated
-                    data = "Not authenticated " + result["plate_number_compared"]
-                    # Process result from server -> show on LED screen
-                    ledPanel.send_data(data)
-                # Need authorized + plate number
-                if result["matched"] and args.relay:
-                    gate.relay_on()
+                # Send cropped plate to server -> returned with plate number
+                if args.server:
+                    try:
+                        data = {"method":"compare_number_plates", "params": { "image":{ "@ImageFormat": "PNG", "@ImageData" :plate_image_base64}}}
+                        start_time = time.time()
+                        response = requests.post(config.SERVER_URL, json=data)
+                        result = response.json()
+                        print("Server inference time is {}".format(time.time() - start_time))
+                        print("Plate number: {}, Confidence: {}".format(result['plate_number_compared'], result['confidence']))
+                        print(result)
+                    except:
+                        print("Failed to send plate to server")
+                    
+                    # Need authorized + plate number
+                    if result["matched"] == True and args.led:
+                        # data if authenticated
+                        data = "Welcome " + result["plate_number_compared"]
+                        # Process result from server -> show on LED screen
+                        ledPanel.send_data(data)
+                    elif result["matched"] == False and args.led:
+                        # data if not authenticated
+                        data = "Not authenticated " + result["plate_number_compared"]
+                        # Process result from server -> show on LED screen
+                        ledPanel.send_data(data)
+                    # Need authorized + plate number
+                    if result["matched"] and args.relay:
+                        gate.relay_on()
+        
         # show result
         if args.show:
+            result = camera.read()
             if camera.result is not None:
                 result = camera.result
 
-                # FPS calculation
-                new_frame_time = time.time()
-                fps = 1/(new_frame_time-prev_frame_time)
-                prev_frame_time = new_frame_time
-                fps = str(int(fps))
-                img = show_fps(result, fps)
+            # FPS calculation
+            new_frame_time = time.time()
+            fps = 1/(new_frame_time-prev_frame_time)
+            prev_frame_time = new_frame_time
+            fps = str(int(fps))
+            img = show_fps(result, fps)
 
-                cv2.imshow("Result", result)
+            cv2.imshow("Result", result)
 
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    # Exited 
-                    camera.stop()
-                    cv2.destroyAllWindows()
-                    print("Cargate Exited!")
-                    time.sleep(1)
-                    break
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                # Exited 
+                camera.stop()
+                cv2.destroyAllWindows()
+                print("Cargate Exited!")
+                time.sleep(1)
+                break
 
 if __name__ == '__main__':
     print("Running Cargate now...")
