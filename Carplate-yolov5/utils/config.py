@@ -12,7 +12,7 @@ class Config:
         self.DEVICE = 'cpu'
 
         # Sensor
-        self.SENSOR_DIST = 100
+        self.SENSOR_DIST = 200
 
         # Status report 
         # self.STATUS_URL = ''

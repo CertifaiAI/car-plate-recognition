@@ -49,7 +49,7 @@ def loop_and_detect(camera, detector, config):
     new_frame_time = 0
     while True:
         # Get sensor distance determine to run or not
-        if (args.sensor and sensor.get_distance() < 200) or args.pc:
+        if (args.sensor and sensor.get_distance() < config.SENSOR_DIST and args.nano) or args.pc:
             # get current frame
             input_frame = camera.read()
 
@@ -129,12 +129,7 @@ def loop_and_detect(camera, detector, config):
 if __name__ == '__main__':
     print("Running Cargate now...")
     try:
-        # Ultrasonic sensor here
-        if args.sensor and args.nano:
-            if sensor.get_distance() < 200: # less 200 cm has object
-                loop_and_detect(detector=detector, camera=camera, config=config)
-        else:
-            loop_and_detect(detector=detector, camera=camera, config=config)
+        loop_and_detect(detector=detector, camera=camera, config=config)
     except (KeyboardInterrupt, SystemExit):
         print('Received keyboard interrupt, quitting threads.\n')
         camera.stop()
