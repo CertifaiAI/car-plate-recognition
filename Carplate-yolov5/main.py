@@ -41,7 +41,6 @@ torch.cuda.is_available()
 detector = detectYolo(weight=config.WEIGHTS_PATH, device=config.DEVICE)
 
 
-
 def loop_and_detect(camera, detector, config):
     # used to record the time when we processed last frame
     prev_frame_time = 0
@@ -77,9 +76,12 @@ def loop_and_detect(camera, detector, config):
             if args.server:
                 try:
                     data = {"method":"compare_number_plates", "params": { "image":{ "@ImageFormat": "PNG", "@ImageData" :plate_image_base64}}}
+                    start_time = time.time()
                     response = requests.post(config.SERVER_URL, json=data)
                     result = response.json()
-                    # TODO find out how result is returned, extract authentication, plate number
+                    print("Server inference time is {}".format(time.time() - start_time))
+                    print("Plate number: {}, Confidence: {}".format(result['plate_number_compared'], result['confidence']))
+                    print(result)
                 except:
                     print("Failed to send plate to server")
                 
