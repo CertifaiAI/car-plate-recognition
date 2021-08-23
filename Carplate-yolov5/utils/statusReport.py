@@ -2,14 +2,14 @@
     Send status to kraftboard server -> Device status, Gate status, Entrance view
     Protocol => mqtt / http
 '''
-from functions import cv2Img_base64Img
+from utils.functions import cv2Img_base64Img
 from threading import Thread
 import paho.mqtt.client as mqtt
 import json
 import time
 
 class StatusReport:
-    def __init__(self, config, camera, door):
+    def __init__(self, config, camera, gate):
         self.stopped = False
         self.thread = None
         # Non-changable as long as device on
@@ -31,7 +31,7 @@ class StatusReport:
 
 
         self.camera = camera
-        self.doorControl = door
+        self.gateControl = gate
 
     def on_message(self, client, userdata, message):
         msg = message.payload.decode("utf-8")
@@ -43,14 +43,14 @@ class StatusReport:
                 self.client.publish(str(self.config.STATUS_END_POINT) + 'response/{}'.format(str(request_id)), json.dumps({ 'value': self.device_status}))
             elif msg['method'] == 'gateStatus':
                 request_id = message.topic.split('/')[-1]
-                self.client.publish(str(self.config.mqtt_endpoint_sub) + 'response/{}'.format(str(request_id)), json.dumps({ 'value': self.gate_status}))
+                self.client.publish(str(self.config.mqtt_endpoint_sub) + 'response/{}'.format(str(request_id)), json.dumps({ 'value': self.gate_status.gate_status}))
             elif msg['method'] == 'view':
                 request_id = message.topic.split('/')[-1]
                 viewFrame = cv2Img_base64Img(self.camera.result())
                 self.client.publish(str(self.config.mqtt_endpoint_sub) + 'response/{}'.format(str(request_id)), json.dumps({ 'value': viewFrame}))
             elif msg['method'] == 'openGate':
-                # Open gate here
-                self.doorControl.open()
+                # Open gate here by control relay here
+                self.gateControl.relay_on()
 
     def start(self):
         self.thread = Thread(target=self.update, args=())

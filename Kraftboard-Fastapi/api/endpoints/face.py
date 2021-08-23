@@ -1,7 +1,6 @@
 from fastapi import APIRouter
-from torch.nn.functional import poisson_nll_loss
-from models.face import faceImage, faceImageEmbeddings
-from utils.face.functions import detectWithMTCNN, face2embeddings, face_aligner, base64Img_cv2Img, array_to_base64, base64_to_array
+from models.face import faceImage, faceImageEmbeddings, comparisons
+from utils.face.functions import detectWithMTCNN, face2embeddings, face_aligner, base64Img_cv2Img, array_to_base64, base64_to_array, compare_faces
 import time
 
 rounter = APIRouter()
@@ -42,4 +41,23 @@ async def embeddings(inputs: faceImageEmbeddings):
     embeddings = embeddings.cpu().numpy()
     execution_time = time.time() - start_time
     result = {'Embedding': array_to_base64(embeddings), "Execution time": execution_time}
+    return result
+
+# For comparing embeddings
+# Input -> Target embeddings and List of existing embeddings
+# output -> matched and userId
+@rounter.post('/compare')
+async def comparing(inputs: comparisons):
+    # preprocess data
+    listofEmbs = []
+    listsofUsers = []
+    listsOfdata = inputs.embeddings
+    for emb in listsOfdata:
+        listofEmbs.append(base64_to_array(emb["embeddings"])[0])
+        listsofUsers.append(emb["userId"])
+    targetEmb = base64_to_array(inputs.embedding_to_compare)
+    # comparing
+    matched, userId, min_dist = compare_faces(lists=listofEmbs, target=targetEmb, names=listsofUsers)
+    # result
+    result = {"matched": matched, "userId": userId, "min_dist": str(min_dist)}
     return result

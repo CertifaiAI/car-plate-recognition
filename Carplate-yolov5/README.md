@@ -34,7 +34,7 @@ Before running the scripts make sure to first setup the FastAPI backend server, 
 ## Inference
 *main.py*: Runs the cargate program without sensors.
 ```bash
-$ python main.py --show
+$ python main.py --show --server
 ```  
 
 *send_images.py*: Iterates through a number of pre-saved NumberPlate images, sends the images over to the FastAPI backend server and outputs the LPR. 
