@@ -9,10 +9,10 @@ class Config:
 
         # Model
         self.WEIGHTS_PATH = 'yolov5/weights/detection.pt'
-        self.DEVICE = 'cpu'
+        self.DEVICE = 'cuda'
 
         # Sensor
-        self.SENSOR_DIST = 200
+        self.SENSOR_DIST = 300
 
         # Status report 
         # self.STATUS_URL = ''

@@ -48,6 +48,7 @@ def loop_and_detect(camera, detector, config):
     # used to record the time at which we processed current frame
     new_frame_time = 0
     while True:
+        #print("Distance from camera: {}".format(str(sensor.get_distance())))
         # Get sensor distance determine to run or not
         if (args.sensor and sensor.get_distance() < config.SENSOR_DIST and args.nano) or args.pc:
             # get current frame
@@ -77,16 +78,14 @@ def loop_and_detect(camera, detector, config):
 
                 # Send cropped plate to server -> returned with plate number
                 if args.server:
-                    try:
-                        data = {"method":"compare_number_plates", "params": { "image":{ "@ImageFormat": "PNG", "@ImageData" :plate_image_base64}}}
-                        start_time = time.time()
-                        response = requests.post(config.SERVER_URL, json=data)
-                        result = response.json()
-                        print("Server inference time is {}".format(time.time() - start_time))
-                        print("Plate number: {}, Confidence: {}".format(result['plate_number_compared'], result['confidence']))
-                        print(result)
-                    except:
-                        print("Failed to send plate to server")
+                    #try: 4
+                    data = {"method":"compare_number_plates", "params": { "image":{ "@ImageFormat": "PNG", "@ImageData" :plate_image_base64}}}
+                    start_time = time.time()
+                    response = requests.post(config.SERVER_URL, json=data)
+                    result = response.json()
+                    print("Server inference time is {}".format(time.time() - start_time))
+                    print("Plate number: {}, Confidence: {}".format(result['plate_number_compared'], result['confidence']))
+                    print(result)
                     
                     # Need authorized + plate number
                     if result["matched"] == True and args.led:
@@ -101,6 +100,7 @@ def loop_and_detect(camera, detector, config):
                         ledPanel.send_data(data)
                     # Need authorized + plate number
                     if result["matched"] and args.relay:
+                    #if args.relay:
                         gate.relay_on()
         
         # show result
