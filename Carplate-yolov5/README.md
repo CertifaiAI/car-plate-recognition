@@ -32,9 +32,14 @@ Before running the scripts make sure to first setup the FastAPI backend server, 
 <br />
 
 ## Inference
-*main.py*: Runs the cargate program without sensors.
+*main.py*: Runs the cargate program without sensors (only detection and OCR).
 ```bash
-$ python main.py --show --server
+$ python main.py --show --server --PC
+```  
+
+*main.py*: Runs the cargate program with sensors (with all sensor on Jetson Nano).
+```bash
+$ python main.py --show --nano --sensor --server --led --relay
 ```  
 
 *send_images.py*: Iterates through a number of pre-saved NumberPlate images, sends the images over to the FastAPI backend server and outputs the LPR. 

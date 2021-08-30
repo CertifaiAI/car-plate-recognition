@@ -67,7 +67,8 @@ def loop_and_detect(camera, detector, config):
             camera.set_results(predictions, classNames)
 
             # Check vehicle and license plate detected and close enough
-            if checkVehicleandPlatePresent(predictions) and checkVehicleCloseEnough(predictions):
+            # if checkVehicleandPlatePresent(predictions) and checkVehicleCloseEnough(predictions):
+            if checkVehicleandPlatePresent(predictions):
 
                 # Crop plate image
                 plate_image = crop_image(image=input_frame, predictions=predictions)
