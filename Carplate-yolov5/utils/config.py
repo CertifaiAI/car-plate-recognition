@@ -5,11 +5,13 @@
 class Config: 
     def __init__(self):
         # Server
-        self.SERVER_URL = 'http://139.162.33.89:8080/api/v1/r69C44coGlPTANdNBnqf/rpc'
+        # self.SERVER_URL = 'http://139.162.33.89:8080/api/v1/r69C44coGlPTANdNBnqf/rpc'
+        self.SERVER_URL = 'http://139.162.33.89:8080/api/v1/cCTjoonMOneHUkz4iDdI/rpc'
+
 
         # Model
         self.WEIGHTS_PATH = 'yolov5/weights/detection.pt'
-        self.DEVICE = 'cuda'
+        self.DEVICE = 'cpu'
 
         # Sensor
         self.SENSOR_DIST = 300
